@@ -8,7 +8,9 @@ import {
   useCurrentFrame,
   Audio,
 } from "remotion";
-import type { VideoSegment } from "@/types/video";
+import type { VideoSegment, Video as VideoType } from "@/types/video";
+import { SegmentCaption } from "./segment-caption";
+import { getCaptionStyle, shouldRenderCaptions } from "@/lib/caption-utils";
 
 interface VideoSegmentRendererProps {
   segmentsToRender: Array<{
@@ -17,12 +19,14 @@ interface VideoSegmentRendererProps {
   }>;
   fps: number;
   segments: VideoSegment[];
+  video: VideoType;
 }
 
 export const VideoSegmentRenderer: React.FC<VideoSegmentRendererProps> = ({
   segmentsToRender,
   fps,
   segments,
+  video,
 }) => {
   return (
     <>
@@ -33,6 +37,7 @@ export const VideoSegmentRenderer: React.FC<VideoSegmentRendererProps> = ({
           originalIndex={originalIndex}
           fps={fps}
           segments={segments}
+          video={video}
         />
       ))}
     </>
@@ -44,6 +49,7 @@ interface SegmentComponentProps {
   originalIndex: number;
   fps: number;
   segments: VideoSegment[];
+  video: VideoType;
 }
 
 const SegmentComponent: React.FC<SegmentComponentProps> = ({
@@ -51,6 +57,7 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
   originalIndex,
   fps,
   segments,
+  video,
 }) => {
   const frame = useCurrentFrame();
 
@@ -65,6 +72,10 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+
+  // Get caption style and check if captions should be rendered
+  const captionStyle = getCaptionStyle(video);
+  const renderCaptions = shouldRenderCaptions(video);
 
   return (
     <Sequence from={startFrame} durationInFrames={segmentFrames}>
@@ -115,6 +126,15 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
             !segment.files.find(
               (file) => file.fileType === "image" || file.fileType === "video",
             )) && <FallbackBackground />}
+
+        {/* Segment-specific captions */}
+        {true && (
+          <SegmentCaption
+            segment={segment}
+            captionStyle={captionStyle}
+            fps={fps}
+          />
+        )}
       </AbsoluteFill>
     </Sequence>
   );

@@ -9,9 +9,7 @@ import type {
   Video as VideoType,
 } from "@/types/video";
 import { useSegmentTiming } from "./hooks/use-segment-timing";
-import { useCaptionData } from "./hooks/use-caption-data";
 import { VideoSegmentRenderer } from "./video-segment-renderer";
-import { DynamicCaptions } from "./dynamic-captions";
 import { VideoWatermark } from "./video-watermark";
 
 interface VideoCompositionProps {
@@ -21,28 +19,17 @@ interface VideoCompositionProps {
 export const VideoComposition: React.FC<VideoCompositionProps> = ({
   video,
 }) => {
-  const { getCurrentSegmentAndTime, getSegmentsToRender, fps } = useSegmentTiming(video);
-  const { getCaptionStyle, getCurrentWordsData } = useCaptionData(video, getCurrentSegmentAndTime().segment, getCurrentSegmentAndTime().relativeTime);
-
-  const { segment: activeSegment, relativeTime } = getCurrentSegmentAndTime();
+  const { getSegmentsToRender, fps } = useSegmentTiming(video);
   const segmentsToRender = getSegmentsToRender();
-  const captionStyle = getCaptionStyle();
-  const { displayText, words } = getCurrentWordsData(captionStyle);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#1a1a1a" }}>
-      {/* Sequential Video/Media Segments - Optimized rendering */}
+      {/* Sequential Video/Media Segments with integrated captions */}
       <VideoSegmentRenderer
         segmentsToRender={segmentsToRender}
         fps={fps}
         segments={video.segments}
-      />
-
-      {/* Dynamic Captions with Word-by-Word Timing */}
-      <DynamicCaptions
-        words={words}
-        displayText={displayText}
-        captionStyle={captionStyle}
+        video={video}
       />
 
       {/* Watermark */}
