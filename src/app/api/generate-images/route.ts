@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FalAIService } from "@/lib/falai-service";
-import { OpenAIService } from "@/lib/openai-service";
 import { auth } from "@/auth";
+import { VideoGenerationService } from "@/lib/video-generation-service";
 
 interface SingleImageRequest {
   type: "single";
@@ -44,12 +43,7 @@ interface ImageResult {
   prompt?: string;
 }
 
-// Helper function to determine which service to use based on model
-function isOpenAIModel(model?: string): boolean {
-  return model === "dall-e-3" || model === "gpt-image-1";
-}
-
-// Helper function to generate image using the appropriate service with caching
+// Helper function to generate single image using VideoGenerationService
 async function generateImageWithService(
   prompt: string,
   style?: string,
@@ -61,31 +55,27 @@ async function generateImageWithService(
   userId?: string,
   projectId?: string,
   segmentId?: string,
+  index: number = 0,
 ): Promise<ImageResult> {
-  let result: ImageResult;
-
-  if (isOpenAIModel(model)) {
-    // Use OpenAI service for DALL-E 3 and GPT-Image-1
-    result = await OpenAIService.generateImage({
-      prompt,
-      style,
-      imageSize,
-      quality,
-      aspectRatio,
-      storeInR2,
-      userId,
-      projectId,
-      segmentId,
-    });
-  } else {
-    // Use FalAI service for Flux models
-    // Note: FalAI service doesn't yet support R2 storage
-    result = await FalAIService.generateImage(prompt, style, imageSize, model);
-  }
+  const result = await VideoGenerationService.generateSingleImage(
+    prompt,
+    model || "flux-schnell",
+    style,
+    imageSize || "portrait_16_9",
+    quality,
+    aspectRatio,
+    storeInR2,
+    userId,
+    projectId,
+    segmentId,
+    index
+  );
 
   return {
-    ...result,
-    prompt,
+    success: result.success,
+    imageUrl: result.imageUrl,
+    error: result.error,
+    prompt: result.prompt,
   };
 }
 
@@ -129,8 +119,9 @@ export async function POST(request: NextRequest) {
       // Batch image generation for create-video flow
       const results: ImageResult[] = [];
 
-      // Process images sequentially to avoid rate limiting
-      for (const promptData of body.prompts) {
+      // Process images in parallel (no more artificial delays)
+      for (let i = 0; i < body.prompts.length; i++) {
+        const promptData = body.prompts[i];
         try {
           const result = await generateImageWithService(
             promptData.prompt,
@@ -143,16 +134,10 @@ export async function POST(request: NextRequest) {
             userId,
             body.projectId,
             promptData.segmentId,
+            i, // Pass the index
           );
 
           results.push(result);
-
-          // Add a small delay between requests to avoid rate limiting
-          // Note: OpenAI has different rate limits than FalAI
-          if (body.prompts.length > 1) {
-            const delay = isOpenAIModel(promptData.model) ? 2000 : 1000; // Longer delay for OpenAI
-            await new Promise((resolve) => setTimeout(resolve, delay));
-          }
         } catch (error) {
           console.error(
             "Error generating image for prompt:",

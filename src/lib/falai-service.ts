@@ -18,7 +18,7 @@ export class FalAIService {
   private static API_KEY_STORAGE_KEY = process.env.FAL_AI_API_KEY || "";
   private static IMAGE_MODELS = {
     "flux-schnell": "https://fal.run/fal-ai/flux/schnell",
-    "flux-dev": "https://fal.run/fal-ai/flux/dev", 
+    "flux-dev": "https://fal.run/fal-ai/flux/dev",
     "flux-pro": "https://fal.run/fal-ai/flux-pro",
   };
   private static VIDEO_MODEL = "fal-ai/minimax-video/image-to-video";
@@ -43,7 +43,6 @@ export class FalAIService {
     model: string = "flux-schnell",
   ): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
     const apiKey = this.getApiKey();
-    console.log("thoufic api key", apiKey);
     if (!apiKey) {
       return { success: false, error: "Fal.ai API key not found" };
     }
@@ -53,7 +52,9 @@ export class FalAIService {
         ? `${prompt}, ${style}`
         : `${prompt}, cinematic, high quality, detailed`;
 
-      const modelUrl = this.IMAGE_MODELS[model as keyof typeof this.IMAGE_MODELS] || this.IMAGE_MODELS["flux-schnell"];
+      const modelUrl =
+        this.IMAGE_MODELS[model as keyof typeof this.IMAGE_MODELS] ||
+        this.IMAGE_MODELS["flux-schnell"];
 
       const response = await fetch(modelUrl, {
         method: "POST",

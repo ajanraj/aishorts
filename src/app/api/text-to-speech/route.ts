@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import OpenAI from "openai";
-import { R2Storage } from "@/lib/r2-storage";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+import { VideoGenerationService } from "@/lib/video-generation-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,37 +28,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate speech using OpenAI TTS
-    const mp3 = await openai.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: voice as "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer",
-      input: text,
-    });
-
-    // Convert response to buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-
-    // Generate project ID if not provided
-    const finalProjectId = projectId || `project_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-
-    // Upload to R2 storage
-    const { key, url } = await R2Storage.uploadAudio(
-      buffer,
+    const result = await VideoGenerationService.generateSingleAudio(
+      text,
+      voice,
       session.user.id!,
-      finalProjectId,
-      index,
-      segmentId
+      projectId,
+      segmentId,
+      index
     );
 
     return NextResponse.json({ 
-      audioUrl: url,
-      key,
-      projectId: finalProjectId
+      audioUrl: result.audioUrl,
+      key: result.key,
+      projectId: result.projectId,
+      duration: result.duration,
+      wordTimings: result.wordTimings || null
     });
   } catch (error) {
     console.error("Error generating speech:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 },
     );
   }

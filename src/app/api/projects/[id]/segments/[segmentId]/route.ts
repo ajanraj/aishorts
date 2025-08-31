@@ -3,6 +3,13 @@ import { auth } from '@/auth';
 import { ProjectService } from '@/lib/project-service';
 import { z } from 'zod';
 
+// WordTiming validation schema
+const WordTimingSchema = z.object({
+  word: z.string(),
+  start: z.number().nonnegative(),
+  end: z.number().nonnegative(),
+});
+
 // Request validation schemas
 const UpdateSegmentSchema = z.object({
   order: z.number().int().nonnegative().optional(),
@@ -13,7 +20,9 @@ const UpdateSegmentSchema = z.object({
   playBackRate: z.number().min(0.5).max(2).optional(),
   withBlur: z.boolean().optional(),
   backgroundMinimized: z.boolean().optional(),
-  wordTimings: z.record(z.string(), z.any()).optional(),
+  wordTimings: z.array(WordTimingSchema).optional(),
+  imageUrl: z.string().optional(),
+  audioUrl: z.string().optional(),
 });
 
 type UpdateSegmentRequest = z.infer<typeof UpdateSegmentSchema>;

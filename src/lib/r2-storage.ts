@@ -86,6 +86,40 @@ export class R2Storage {
   }
 
   /**
+   * Upload an image buffer with organized folder structure
+   */
+  static async uploadImage(
+    buffer: Buffer, 
+    userId: string, 
+    projectId: string, 
+    index: number,
+    segmentId?: string,
+    extension: string = 'jpg'
+  ): Promise<{key: string, url: string}> {
+    try {
+      // Generate unique filename
+      const fileId = uuidv4();
+      const timestamp = Date.now();
+      const filename = `image_${index}_${timestamp}.${extension}`;
+      
+      // Create organized folder structure: /{userId}/{projectId}/{segmentId?}/image/
+      const folderPath = segmentId 
+        ? `${userId}/${projectId}/${segmentId}/image`
+        : `${userId}/${projectId}/image`;
+      
+      const key = `${folderPath}/${filename}`;
+      const contentType = `image/${extension}`;
+      
+      const url = await this.uploadFile(buffer, key, contentType);
+      
+      return { key, url };
+    } catch (error) {
+      console.error('Error uploading image to R2:', error);
+      throw new Error('Failed to upload image to R2 storage');
+    }
+  }
+
+  /**
    * Upload an audio buffer with organized folder structure
    */
   static async uploadAudio(

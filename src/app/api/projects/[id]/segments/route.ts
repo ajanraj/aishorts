@@ -3,6 +3,13 @@ import { auth } from '@/auth';
 import { ProjectService } from '@/lib/project-service';
 import { z } from 'zod';
 
+// WordTiming validation schema
+const WordTimingSchema = z.object({
+  word: z.string(),
+  start: z.number().nonnegative(),
+  end: z.number().nonnegative(),
+});
+
 // Request validation schemas
 const CreateSegmentSchema = z.object({
   order: z.number().int().nonnegative(),
@@ -13,7 +20,7 @@ const CreateSegmentSchema = z.object({
   playBackRate: z.number().min(0.5).max(2).optional(),
   withBlur: z.boolean().optional(),
   backgroundMinimized: z.boolean().optional(),
-  wordTimings: z.record(z.string(), z.any()).optional(),
+  wordTimings: z.array(WordTimingSchema).optional(),
 });
 
 // Batch creation schema
@@ -113,7 +120,7 @@ export async function POST(
           playBackRate: segment.playBackRate || 1.0,
           withBlur: segment.withBlur || false,
           backgroundMinimized: segment.backgroundMinimized || false,
-          wordTimings: segment.wordTimings || null,
+          wordTimings: segment.wordTimings || undefined,
         }))
       );
 
@@ -151,7 +158,7 @@ export async function POST(
       playBackRate: segmentData.playBackRate || 1.0,
       withBlur: segmentData.withBlur || false,
       backgroundMinimized: segmentData.backgroundMinimized || false,
-      wordTimings: segmentData.wordTimings || null,
+      wordTimings: segmentData.wordTimings || undefined,
     });
 
     return NextResponse.json({

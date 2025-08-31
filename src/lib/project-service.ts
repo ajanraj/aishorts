@@ -21,6 +21,7 @@ import {
 } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { R2Storage } from './r2-storage';
+import { type WordTiming } from './transcription-service';
 
 // Types for service operations
 export interface CreateProjectData {
@@ -52,7 +53,7 @@ export interface CreateSegmentData {
   playBackRate?: number;
   withBlur?: boolean;
   backgroundMinimized?: boolean;
-  wordTimings?: any;
+  wordTimings?: WordTiming[];
 }
 
 export interface UpdateSegmentData {
@@ -64,7 +65,9 @@ export interface UpdateSegmentData {
   playBackRate?: number;
   withBlur?: boolean;
   backgroundMinimized?: boolean;
-  wordTimings?: any;
+  wordTimings?: WordTiming[];
+  imageUrl?: string;
+  audioUrl?: string;
 }
 
 export class ProjectService {

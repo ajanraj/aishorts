@@ -68,13 +68,12 @@ export const useCaptionData = (
 
     // Flatten all words from word timings to get proper sequence
     for (const timing of activeSegment?.wordTimings || []) {
-      for (const word of timing.words) {
-        allWords.push({
-          text: word.text,
-          start: word.start,
-          end: word.end,
-        });
-      }
+      console.log("timing", timing);
+      allWords.push({
+        text: timing.text,
+        start: timing.start,
+        end: timing.end,
+      });
     }
 
     // Sort words by start time to ensure proper order

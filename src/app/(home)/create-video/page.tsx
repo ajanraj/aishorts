@@ -1,21 +1,13 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useImageGeneration } from "@/hooks/use-image-generation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { VideoSegmentData } from "@/lib/project-storage";
-import { ProjectAPI } from "@/lib/project-api";
 import {
   imageStyles,
   getDefaultImageStyle,
-  getImageStyle,
 } from "@/lib/image-config";
-import {
-  getAudioDurationWithFallback,
-  validateSegmentDurations,
-} from "@/lib/audio-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +43,6 @@ const CreateVideoPage = () => {
   const [currentStep, setCurrentStep] = useState("");
   const [progress, setProgress] = useState(0);
   const router = useRouter();
-  const { generateBatchImages } = useImageGeneration();
 
   const videoTypes = [
     { id: "faceless", label: "Faceless Video", icon: Eye, active: true },
@@ -77,236 +68,115 @@ const CreateVideoPage = () => {
 
     setIsGenerating(true);
     setProgress(0);
+    setCurrentStep("Initializing video generation...");
 
     try {
-      // Step 1: Break script into chunks
-      setCurrentStep("Breaking script into segments...");
-      setProgress(10);
-
-      const chunksResponse = await fetch("/api/break-script", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ script }),
-      });
-
-      if (!chunksResponse.ok) {
-        throw new Error("Failed to break script into chunks");
-      }
-
-      const { chunks } = await chunksResponse.json();
-      setProgress(20);
-
-      // Step 2: Generate image prompts
-      setCurrentStep("Generating image prompts...");
-      const promptsResponse = await fetch("/api/generate-image-prompts", {
+      // Call the new create-video API
+      const response = await fetch("/api/create-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chunks,
+          script,
+          videoType: selectedVideoType,
+          mediaType: selectedMediaType,
           styleId: selectedStyleId,
-          style:
-            getImageStyle(selectedStyleId)?.name ?? getDefaultImageStyle().name,
+          voice: selectedVoice,
         }),
       });
 
-      if (!promptsResponse.ok) {
-        throw new Error("Failed to generate image prompts");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to start video generation");
       }
 
-      const { prompts } = await promptsResponse.json();
-      setProgress(30);
+      const { projectId, status, message } = await response.json();
+      console.log("Video generation started:", { projectId, status, message });
+      
+      setCurrentStep("Video generation started. Processing in background...");
+      setProgress(10);
 
-      // Create new project for this video generation
-      let projectId: string;
-      try {
-        const { data: projectData } = await ProjectAPI.createProject({
-          title: `Video Project - ${new Date().toLocaleDateString()}`,
-          idea: script.slice(0, 200) + (script.length > 200 ? '...' : ''), // Use first 200 chars as idea
-          script: script,
-        });
-        projectId = projectData.id;
-      } catch (error) {
-        console.error('Failed to create project:', error);
-        throw new Error('Failed to create project. Please try again.');
-      }
+      // Start polling for completion
+      pollProjectStatus(projectId);
 
-      const segments: VideoSegmentData[] = chunks.map(
-        (chunk: string, index: number) => ({
-          text: chunk,
-          imagePrompt: prompts[index] || `Visual representation of: ${chunk}`,
-          order: index,
-        }),
-      );
-
-      // Create segments in the database via API
-      let createdSegments;
-      try {
-        const result = await ProjectAPI.createSegmentsBatch(projectId, segments);
-        createdSegments = result.data;
-      } catch (error) {
-        console.error('Failed to create segments:', error);
-        throw new Error('Failed to create video segments. Please try again.');
-      }
-      setProgress(40);
-
-      // Step 3: Generate images for all segments using cached batch generation
-      setCurrentStep("Generating all images...");
-      const imageStyle =
-        getImageStyle(selectedStyleId) || getDefaultImageStyle();
-
-      // Prepare batch image generation request
-      const imagePrompts = segments.map((segment) => {
-        const enhancedPrompt = `${imageStyle.systemPrompt}. ${segment.imagePrompt}`;
-        // Map model string from config to service model key
-        const modelKey = imageStyle.model.includes("schnell")
-          ? "flux-schnell"
-          : imageStyle.model.includes("dev")
-            ? "flux-dev"
-            : imageStyle.model.includes("pro")
-              ? "flux-pro"
-              : "flux-schnell";
-        return {
-          prompt: enhancedPrompt,
-          style: imageStyle.name,
-          imageSize: "portrait_16_9",
-          model: modelKey,
-        };
-      });
-
-      setProgress(45);
-
-      const batchImageResult = await generateBatchImages(imagePrompts);
-      setProgress(65);
-
-      // Update segments with generated images via API
-      if (batchImageResult.success && batchImageResult.results) {
-        for (let i = 0; i < batchImageResult.results.length; i++) {
-          const result = batchImageResult.results[i];
-          if (result.success && result.imageUrl && createdSegments[i]) {
-            // Upload image to the project files system
-            try {
-              await ProjectAPI.uploadFile({
-                projectId: projectId,
-                segmentId: createdSegments[i].id,
-                fileType: 'image',
-                fileName: `segment_${i}_image.webp`,
-                mimeType: 'image/webp',
-                fileSize: 1024, // Placeholder size
-                sourceUrl: result.imageUrl,
-              });
-            } catch (error) {
-              console.warn(`Failed to upload image for segment ${i}:`, error);
-            }
-          }
-        }
-        
-        setCurrentStep(
-          `Generated ${batchImageResult.totalGenerated} of ${batchImageResult.totalRequested} images`,
-        );
-      }
-
-      // Step 4: Generate audio for each segment
-      setCurrentStep("Generating audio...");
-      for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i];
-        setCurrentStep(`Generating audio ${i + 1} of ${segments.length}...`);
-
-        const audioResponse = await fetch("/api/text-to-speech", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: segment.text,
-            voice: selectedVoice,
-            index: i,
-          }),
-        });
-
-        if (audioResponse.ok) {
-          const { audioUrl } = await audioResponse.json();
-
-          // Update progress for audio generation completion
-          setProgress(70 + (i + 0.5) * (30 / segments.length));
-          setCurrentStep(`Getting audio duration for segment ${i + 1}...`);
-
-          // Get actual audio duration with improved reliability
-          const actualDuration = await getAudioDurationWithFallback(
-            audioUrl,
-            segment.text,
-            selectedVoice,
-          );
-          console.log(`Segment ${i} duration: ${actualDuration.toFixed(2)}s`);
-
-          // Upload audio file and update segment duration
-          try {
-            await ProjectAPI.uploadFile({
-              projectId: projectId,
-              segmentId: createdSegments[i].id,
-              fileType: 'audio',
-              fileName: `segment_${i}_audio.mp3`,
-              mimeType: 'audio/mpeg',
-              fileSize: 1024, // Placeholder size
-              sourceUrl: audioUrl,
-            });
-
-            // Update segment duration
-            await ProjectAPI.updateSegment(projectId, createdSegments[i].id, {
-              duration: actualDuration,
-            });
-          } catch (error) {
-            console.warn(`Failed to upload audio for segment ${i}:`, error);
-          }
-        }
-
-        setProgress(70 + (i + 1) * (30 / segments.length));
-      }
-
-      // Fetch final project data to validate durations
-      try {
-        const { data: finalProject } = await ProjectAPI.getProject(projectId, true);
-        
-        if (finalProject?.segments) {
-          const isValid = validateSegmentDurations(finalProject.segments);
-          if (!isValid) {
-            console.warn(
-              "Some segments had invalid durations, they have been fixed with estimates",
-            );
-            // Note: Duration validation and fixing is now handled by the API
-          }
-
-          // Log total video duration for debugging
-          const totalDuration = finalProject.segments.reduce(
-            (acc: number, seg: any) => acc + (seg.duration || 0),
-            0,
-          );
-          console.log(
-            `Total video duration: ${totalDuration.toFixed(2)}s for ${finalProject.segments.length} segments`,
-          );
-
-          // Update project status to completed
-          await ProjectAPI.updateProject(projectId, {
-            status: 'completed',
-            duration: totalDuration,
-          });
-        }
-      } catch (error) {
-        console.warn('Failed to finalize project:', error);
-      }
-
-      setCurrentStep("Video creation complete!");
-      setProgress(100);
-
-      // Redirect to video page with the created video id
-      setTimeout(() => {
-        router.push(`/video/${projectId}`);
-      }, 2000);
     } catch (error) {
       console.error("Error generating video:", error);
       alert(
         `Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
       );
-    } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Polling function to check project status
+  const pollProjectStatus = async (projectId: string) => {
+    const maxAttempts = 120; // 10 minutes max (120 * 5 seconds)
+    let attempts = 0;
+
+    const checkStatus = async () => {
+      try {
+        attempts++;
+        console.log(`Polling attempt ${attempts}/${maxAttempts} for project ${projectId}`);
+        
+        const response = await fetch(`/api/projects/${projectId}`);
+        if (!response.ok) {
+          throw new Error("Failed to check project status");
+        }
+
+        const { data: project } = await response.json();
+        console.log("Project status:", project.status);
+
+        // Update progress based on status
+        if (project.status === "generating") {
+          const progressPercent = Math.min(20 + (attempts * 60) / maxAttempts, 90);
+          setProgress(progressPercent);
+          setCurrentStep(`Generating video... (${Math.round(progressPercent)}%)`);
+          
+          // Continue polling only if still generating
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatus, 3000); // Poll every 3 seconds
+          } else {
+            throw new Error("Video generation timeout");
+          }
+        } else if (project.status === "completed") {
+          setCurrentStep("Video generation completed!");
+          setProgress(100);
+          
+          // Stop polling and redirect to video editor
+          setTimeout(() => {
+            router.push(`/video/${projectId}`);
+          }, 2000);
+          
+          setIsGenerating(false);
+          return; // Stop polling
+        } else if (project.status === "failed") {
+          setIsGenerating(false);
+          throw new Error("Video generation failed on the server");
+        } else {
+          // Unknown status, keep polling but warn
+          console.warn("Unknown project status:", project.status);
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatus, 3000);
+          } else {
+            throw new Error("Video generation timeout");
+          }
+        }
+
+      } catch (error) {
+        console.error("Error checking project status:", error);
+        
+        if (attempts >= maxAttempts) {
+          alert("Video generation timeout. Please check your project status manually.");
+          setIsGenerating(false);
+          return;
+        }
+
+        // Retry on error
+        setTimeout(checkStatus, 5000); // Wait longer on error
+      }
+    };
+
+    // Start the first check after a short delay
+    setTimeout(checkStatus, 2000);
   };
 
   return (
