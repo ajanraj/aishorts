@@ -30,19 +30,7 @@ export interface VideoSegmentData {
 
 export interface ProjectData extends LegacyProjectData {}
 
-interface ProjectClientCache {
-  projects: Map<string, ProjectWithDetails>;
-  lastFetch: number;
-  cacheDuration: number; // 5 minutes
-}
-
 export class ProjectClient {
-  private static cache: ProjectClientCache = {
-    projects: new Map(),
-    lastFetch: 0,
-    cacheDuration: 5 * 60 * 1000, // 5 minutes
-  };
-
   private static currentProjectId: string | null = null;
 
   /**
@@ -64,7 +52,7 @@ export class ProjectClient {
     try {
       const project = await ApiClient.createProject(projectData);
       
-      // Convert to ProjectWithDetails format for cache
+      // Convert to ProjectWithDetails format
       const projectWithDetails: ProjectWithDetails = {
         ...project,
         segments: [],
@@ -72,9 +60,6 @@ export class ProjectClient {
         layers: [],
         tracks: []
       };
-      
-      // Update cache
-      this.cache.projects.set(project.id, projectWithDetails);
       
       // Set as current project
       this.setCurrentProject(project.id);
@@ -94,17 +79,8 @@ export class ProjectClient {
    */
   static async getProject(projectId: string): Promise<ProjectWithDetails | null> {
     try {
-      // Check cache first
-      const cached = this.cache.projects.get(projectId);
-      if (cached && this.isCacheValid()) {
-        return cached;
-      }
-
+      // Always fetch fresh data to ensure we get complete project details
       const project = await ApiClient.getProject(projectId);
-      
-      // Update cache
-      this.cache.projects.set(projectId, project);
-      
       return project;
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 404) {
@@ -135,17 +111,7 @@ export class ProjectClient {
         settings: data.settings,
       };
 
-      const updatedProject = await ApiClient.updateProject(projectId, updateData);
-      
-      // Update cache - convert to ProjectWithDetails
-      const projectWithDetails: ProjectWithDetails = {
-        ...updatedProject,
-        segments: (updatedProject.segments || []).map(segment => ({ ...segment, files: [] })),
-        files: updatedProject.files || [],
-        layers: [],
-        tracks: []
-      };
-      this.cache.projects.set(projectId, projectWithDetails);
+      await ApiClient.updateProject(projectId, updateData);
     } catch (error) {
       console.error('Failed to update project:', error);
       
@@ -160,9 +126,6 @@ export class ProjectClient {
   static async deleteProject(projectId: string): Promise<void> {
     try {
       await ApiClient.deleteProject(projectId);
-      
-      // Remove from cache
-      this.cache.projects.delete(projectId);
       
       // Clear current project if it was the deleted one
       if (this.currentProjectId === projectId) {
@@ -184,28 +147,8 @@ export class ProjectClient {
    */
   static async getUserProjects(): Promise<Project[]> {
     try {
-      // Check cache first
-      if (this.isCacheValid() && this.cache.projects.size > 0) {
-        return Array.from(this.cache.projects.values()).sort(
-          (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-      }
-
+      // Always fetch fresh data
       const projects = await ApiClient.getUserProjects();
-      
-      // Update cache - convert Project to ProjectWithDetails
-      this.cache.projects.clear();
-      projects.forEach(project => {
-        const projectWithDetails: ProjectWithDetails = {
-          ...project,
-          segments: (project.segments || []).map(segment => ({ ...segment, files: [] })),
-          files: project.files || [],
-          layers: [],
-          tracks: []
-        };
-        this.cache.projects.set(project.id, projectWithDetails);
-      });
-      this.cache.lastFetch = Date.now();
       
       return projects.sort(
         (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -301,9 +244,6 @@ export class ProjectClient {
       });
 
       await Promise.all(segmentPromises);
-      
-      // Refresh project in cache
-      this.cache.projects.delete(projectId);
     } catch (error) {
       console.error('Failed to update segments:', error);
       
@@ -321,10 +261,6 @@ export class ProjectClient {
   ): Promise<ProjectSegment> {
     try {
       const segment = await ApiClient.createSegment(projectId, data);
-      
-      // Invalidate project cache
-      this.cache.projects.delete(projectId);
-      
       return segment;
     } catch (error) {
       console.error('Failed to create segment:', error);
@@ -342,10 +278,6 @@ export class ProjectClient {
   ): Promise<ProjectSegment> {
     try {
       const segment = await ApiClient.updateSegment(projectId, segmentId, data);
-      
-      // Invalidate project cache
-      this.cache.projects.delete(projectId);
-      
       return segment;
     } catch (error) {
       console.error('Failed to update segment:', error);
@@ -478,30 +410,7 @@ export class ProjectClient {
     }
   }
 
-  // ============= CACHE MANAGEMENT =============
-
-  /**
-   * Check if cache is valid
-   */
-  private static isCacheValid(): boolean {
-    return Date.now() - this.cache.lastFetch < this.cache.cacheDuration;
-  }
-
-  /**
-   * Clear cache
-   */
-  static clearCache(): void {
-    this.cache.projects.clear();
-    this.cache.lastFetch = 0;
-  }
-
-  /**
-   * Force refresh cache
-   */
-  static async refreshCache(): Promise<void> {
-    this.clearCache();
-    await this.getUserProjects();
-  }
+  // ============= UTILITY METHODS =============
 
   // ============= OFFLINE FALLBACK METHODS =============
 

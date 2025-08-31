@@ -51,7 +51,10 @@ export const useCaptionData = (
   };
 
   const getCurrentWordsData = (captionStyle: CaptionStyle) => {
-    if (!activeSegment.wordTimings || !activeSegment.wordTimings.length) {
+    if (
+      activeSegment &&
+      (!activeSegment?.wordTimings || !activeSegment?.wordTimings.length)
+    ) {
       return {
         displayText: activeSegment.text,
         words: [
@@ -64,7 +67,7 @@ export const useCaptionData = (
     let allWords: Array<{ text: string; start: number; end: number }> = [];
 
     // Flatten all words from word timings to get proper sequence
-    for (const timing of activeSegment.wordTimings || []) {
+    for (const timing of activeSegment?.wordTimings || []) {
       for (const word of timing.words) {
         allWords.push({
           text: word.text,

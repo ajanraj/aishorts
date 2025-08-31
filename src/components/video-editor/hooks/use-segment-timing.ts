@@ -23,10 +23,10 @@ export const useSegmentTiming = (video: Video) => {
 
     // If frame is past all segments, return the last segment
     const lastSegment = video.segments[video.segments.length - 1];
-    const lastSegmentFrames = Math.round(lastSegment.duration * fps);
+    const lastSegmentFrames = Math.round(lastSegment?.duration * fps);
     return {
       segment: lastSegment,
-      relativeTime: lastSegment.duration,
+      relativeTime: lastSegment?.duration,
       cumulativeFrames: cumulativeFrames - lastSegmentFrames,
       segmentFrames: lastSegmentFrames,
     };

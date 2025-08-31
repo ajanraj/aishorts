@@ -27,7 +27,7 @@ export function FrameCard({
   return (
     <Card
       className={`group cursor-pointer border transition-all ${
-        isHorizontal ? "relative w-20 h-20" : "min-h-[300px]"
+        isHorizontal ? "relative h-20 w-20" : "min-h-[300px]"
       } ${
         isSelected
           ? "border-blue-500 bg-blue-50"
@@ -37,7 +37,7 @@ export function FrameCard({
     >
       <div className={isHorizontal ? "p-2" : "p-3"}>
         {/* Frame header */}
-        {!isHorizontal && <FrameHeader index={index} onEdit={onEdit} />}
+        {/* {!isHorizontal && <FrameHeader index={index} onEdit={onEdit} />} */}
 
         {/* Frame thumbnail and content */}
         <FrameThumbnail

@@ -220,7 +220,7 @@ export function useRefreshProjects() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => ProjectClient.refreshCache(),
+    mutationFn: () => Promise.resolve(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectQueryKeys.all });
     },
