@@ -176,4 +176,56 @@ export class TranscriptionService {
 
     return subtitles;
   }
+
+  /**
+   * Convert flat word timings to batched structure for video captions
+   */
+  static convertToWordBatches(
+    wordTimings: WordTiming[],
+    wordsPerBatch: number = 3
+  ): Array<{
+    text: string;
+    start: number;
+    end: number;
+    words: Array<{
+      text: string;
+      start: number;
+      end: number;
+    }>;
+  }> {
+    const batches: Array<{
+      text: string;
+      start: number;
+      end: number;
+      words: Array<{
+        text: string;
+        start: number;
+        end: number;
+      }>;
+    }> = [];
+    
+    for (let i = 0; i < wordTimings.length; i += wordsPerBatch) {
+      const wordsGroup = wordTimings.slice(i, i + wordsPerBatch);
+      if (wordsGroup.length === 0) continue;
+
+      const batchText = wordsGroup.map((w) => w.word.trim()).join(" ");
+      const batchStart = wordsGroup[0].start;
+      const batchEnd = wordsGroup[wordsGroup.length - 1].end;
+      
+      const batchWords = wordsGroup.map((word) => ({
+        text: word.word,
+        start: word.start,
+        end: word.end,
+      }));
+
+      batches.push({
+        text: batchText,
+        start: batchStart,
+        end: batchEnd,
+        words: batchWords,
+      });
+    }
+
+    return batches;
+  }
 }

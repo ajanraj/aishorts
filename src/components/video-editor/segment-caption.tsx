@@ -1,14 +1,7 @@
 import React, { useMemo } from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import type { VideoSegment, CaptionStyle } from "@/types/video";
+import type { VideoSegment, CaptionStyle, WordTiming } from "@/types/video";
 import type { WordData } from "@/lib/caption-utils";
-
-interface WordBatch {
-  text: string;
-  start: number;
-  end: number;
-  words: WordData[];
-}
 
 const getCurrentWordsData = (
   segment: VideoSegment,
@@ -20,63 +13,25 @@ const getCurrentWordsData = (
 } => {
   // If no word timings, show the entire segment text
   if (!segment.wordTimings || segment.wordTimings.length === 0) {
-    console.log("segment-caption getCurrentWordsData no wordtimings", {
-      displayText: segment.text,
-      words: [{ text: segment.text, isActive: true, isCompleted: false }],
-    });
     return {
       displayText: segment.text,
       words: [{ text: segment.text, isActive: true, isCompleted: false }],
     };
   }
 
-  // Flatten all words from word timings - these are already segment-relative (0-based)
-  let allWords: Array<{ text: string; start: number; end: number }> = [];
-  console.log("thoufic timing", segment.wordTimings);
-  for (const timing of segment.wordTimings[0]) {
-    allWords.push({
-      text: timing.word,
-      start: timing.start,
-      end: timing.end,
-    });
-  }
+  // Find the current active batch from pre-batched word timings
+  let currentBatch: WordTiming | null = null;
 
-  // Sort words by start time to ensure proper order
-  allWords.sort((a, b) => a.start - b.start);
-  console.log("thoufic allwords", allWords);
-
-  // Create stable word batches based on wordsPerBatch setting
-  const wordsPerBatch = captionStyle.wordsPerBatch || 1;
-  const batches: WordBatch[] = [];
-
-  for (let i = 0; i < allWords.length; i += wordsPerBatch) {
-    const batchWords = allWords.slice(i, i + wordsPerBatch);
-    const batchText = batchWords.map((w) => w.text).join(" ");
-    const batchStart = batchWords[0].start;
-    const batchEnd = batchWords[batchWords.length - 1].end;
-
-    batches.push({
-      text: batchText,
-      start: batchStart,
-      end: batchEnd,
-      words: batchWords.map((word) => ({
-        text: word.text,
-        isActive: segmentTime >= word.start && segmentTime <= word.end,
-        isCompleted: segmentTime > word.end,
-      })),
-    });
-  }
-
-  // Find the current active batch - only show batch if ALL words in previous batches are completed
-  let currentBatch: WordBatch | null = null;
-
-  for (const batch of batches) {
-    const allPreviousBatchesCompleted = batches
-      .slice(0, batches.indexOf(batch))
-      .every((prevBatch) => segmentTime > prevBatch.end);
-
+  for (const batch of segment.wordTimings[0]) {
+    // Check if this batch is active (current time is within batch time range)
     const batchHasStarted = segmentTime >= batch.start;
     const batchIsActive = segmentTime <= batch.end;
+
+    // Check if all previous batches are completed
+    const batchIndex = segment.wordTimings.indexOf(batch);
+    const allPreviousBatchesCompleted = segment.wordTimings
+      .slice(0, batchIndex)
+      .every((prevBatch) => segmentTime > prevBatch.end);
 
     if (allPreviousBatchesCompleted && batchHasStarted && batchIsActive) {
       currentBatch = batch;
@@ -86,43 +41,39 @@ const getCurrentWordsData = (
 
   // If no current batch, show the last completed batch or first batch as preview
   if (!currentBatch) {
-    const completedBatches = batches.filter((batch) => segmentTime > batch.end);
+    const completedBatches = segment.wordTimings.filter(
+      (batch) => segmentTime > batch.end,
+    );
     if (completedBatches.length > 0) {
       currentBatch = completedBatches[completedBatches.length - 1];
-      // Mark all words as completed for display
-      currentBatch = {
-        ...currentBatch,
-        words: currentBatch.words.map((word) => ({
-          ...word,
-          isCompleted: true,
-          isActive: false,
-        })),
-      };
     } else {
       // Show first batch as preview
-      currentBatch = batches[0] || null;
-      if (currentBatch) {
-        currentBatch = {
-          ...currentBatch,
-          words: currentBatch.words.map((word) => ({
-            ...word,
-            isActive: false,
-            isCompleted: false,
-          })),
-        };
-      }
+      currentBatch = segment.wordTimings[0] || null;
     }
   }
 
-  const displayText = currentBatch?.text || "";
-  const words = currentBatch?.words || [];
+  if (!currentBatch) {
+    return {
+      displayText: segment.text,
+      words: [{ text: segment.text, isActive: false, isCompleted: false }],
+    };
+  }
 
-  console.log("segment-caption getCurrentWordsData", {
-    displayText,
-    words,
-    currentBatch,
-    segmentTime,
-  });
+  // console.log("thoufic currentBatchwords", currentBatch);
+  // Process individual words within the current batch
+  const words: WordData[] = currentBatch.words?.map((word) => ({
+    text: word.text,
+    isActive: segmentTime >= word.start && segmentTime <= word.end,
+    isCompleted: segmentTime > word.end,
+  }));
+
+  const displayText = currentBatch.text;
+  // console.log("thoufic ", {
+  //   displayText,
+  //   words,
+  //   segmentwords: segment.wordTimings,
+  //   segmentTime,
+  // });
 
   return { displayText, words };
 };
@@ -142,10 +93,8 @@ export const SegmentCaption: React.FC<SegmentCaptionProps> = ({
   const segmentTime = useMemo(() => frame / fps, [frame, fps]); // Convert frame to seconds within this segment
 
   const { displayText, words } = useMemo(() => {
-    console.log("thoufic ", { segment, captionStyle, segmentTime });
     return getCurrentWordsData(segment, captionStyle, segmentTime);
   }, [segment, captionStyle, segmentTime]);
-  console.log("thoufic segment-captions", { displayText, words });
 
   return (
     <AbsoluteFill
@@ -159,7 +108,7 @@ export const SegmentCaption: React.FC<SegmentCaptionProps> = ({
       }}
     >
       <CaptionContainer captionStyle={captionStyle}>
-        {words.length > 0 ? (
+        {words?.length > 0 ? (
           <WordRenderer words={words} captionStyle={captionStyle} />
         ) : (
           <span

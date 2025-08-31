@@ -6,10 +6,7 @@ import { FalAIService } from "@/lib/falai-service";
 import { OpenAIService } from "@/lib/openai-service";
 import { R2Storage } from "@/lib/r2-storage";
 import { parseStructuredOutput } from "@/lib/api-utils";
-import {
-  TranscriptionService,
-  type WordTiming,
-} from "@/lib/transcription-service";
+import { TranscriptionService } from "@/lib/transcription-service";
 
 // MP3 frame header parsing utilities
 function getMP3Duration(buffer: Buffer): number | null {
@@ -116,7 +113,7 @@ export interface MediaGenerationResult {
     audioUrl: string;
     duration: number;
     segmentId: string;
-    wordTimings?: WordTiming[];
+    wordTimings?: any[];
   }>;
 }
 
@@ -229,7 +226,7 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     audioUrl: string;
     key: string;
     duration: number;
-    wordTimings?: WordTiming[];
+    wordTimings?: any[];
   }> {
     // Generate speech using OpenAI TTS
     const mp3 = await openai.audio.speech.create({
@@ -244,16 +241,23 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     // Get duration from buffer
     let duration = 0;
 
-    // Generate word-level timestamps using transcription service
-    let wordTimings: WordTiming[] | undefined;
+    // Generate word-level timestamps using transcription service and convert to batches
+    let wordTimings: any[] | undefined;
     try {
       console.log(`Generating word timestamps for segment ${index}...`);
       const transcriptionResult =
         await TranscriptionService.transcribeAudio(buffer);
-      wordTimings = transcriptionResult.words;
+      
+      // Convert flat word timings to batched structure (default 3 words per batch)
+      const batchedTimings = TranscriptionService.convertToWordBatches(
+        transcriptionResult.words,
+        3
+      );
+      
+      wordTimings = batchedTimings;
       duration = transcriptionResult.duration;
       console.log(
-        `Generated ${wordTimings.length} word timestamps for segment ${index}`,
+        `Generated ${batchedTimings.length} batched word groups for segment ${index}`,
       );
     } catch (error) {
       console.warn(
@@ -600,7 +604,7 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     key: string;
     projectId: string;
     duration: number;
-    wordTimings?: WordTiming[];
+    wordTimings?: any[];
   }> {
     // Generate speech using OpenAI TTS
     const mp3 = await openai.audio.speech.create({
@@ -620,17 +624,24 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     // Get duration from buffer
     const duration = getMP3Duration(buffer) || estimateMP3Duration(buffer);
 
-    // Generate word-level timestamps using transcription service
-    let wordTimings: WordTiming[] | undefined;
+    // Generate word-level timestamps using transcription service and convert to batches
+    let wordTimings: any[] | undefined;
     try {
       console.log(
         `Generating word timestamps for single audio segment ${index}...`,
       );
       const transcriptionResult =
         await TranscriptionService.transcribeAudio(buffer);
-      wordTimings = transcriptionResult.words;
+      
+      // Convert flat word timings to batched structure (default 3 words per batch)
+      const batchedTimings = TranscriptionService.convertToWordBatches(
+        transcriptionResult.words,
+        3
+      );
+      
+      wordTimings = batchedTimings;
       console.log(
-        `Generated ${wordTimings.length} word timestamps for single audio segment ${index}`,
+        `Generated ${batchedTimings.length} batched word groups for single audio segment ${index}`,
       );
     } catch (error) {
       console.warn(

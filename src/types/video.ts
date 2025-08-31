@@ -56,14 +56,14 @@ interface MediaItem {
 // Project File interface (for the files array in segments)
 interface ProjectFile {
   id: string;
-  fileType: 'image' | 'video' | 'audio' | 'overlay';
+  fileType: "image" | "video" | "audio" | "overlay";
   fileName: string;
   originalName: string;
   mimeType: string;
   fileSize: number;
   r2Key: string;
   r2Url: string;
-  uploadStatus: 'uploading' | 'completed' | 'failed';
+  uploadStatus: "uploading" | "completed" | "failed";
   metadata?: any;
   createdAt: string;
   expiresAt?: string;
@@ -82,7 +82,7 @@ interface VideoSegment {
   playBackRate: number;
   duration: number;
   withBlur: boolean;
-  wordTimings?: WordTiming[]; // Made optional
+  wordTimings?: WordTiming[]; // Changed from Word[] to WordTiming[] for batched structure
   backgroundMinimized: boolean;
   order: number;
   overlay?: Overlay;
