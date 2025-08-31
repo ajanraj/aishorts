@@ -388,7 +388,7 @@ export default function VideoEditorPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full w-full flex-col bg-white">
       <div className="flex-0 sticky top-0 z-10 bg-white">
         <VideoEditorHeader video={videoData.video} onExport={handleExport} />
       </div>

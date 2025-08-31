@@ -72,7 +72,7 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
     .reduce((acc, seg) => acc + Math.round(seg.duration * fps), 0);
 
   // Create a subtle animation effect
-  const scaleEffect = interpolate(frame % 60, [0, 30, 60], [1, 1.02, 1], {
+  const scaleEffect = interpolate(frame % 60, [0, 60], [1, 1.04], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });

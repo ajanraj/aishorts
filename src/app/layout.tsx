@@ -19,7 +19,9 @@ export default function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable} min-h-full font-sans`}
       >
         <QueryProvider>
-          {children}
+          <div className="text-surface-500 h-lvh text-sm leading-6">
+            {children}
+          </div>
         </QueryProvider>
       </body>
     </html>

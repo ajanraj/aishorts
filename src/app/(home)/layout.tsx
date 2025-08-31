@@ -24,7 +24,7 @@ export default function DashboardLayout({
         strategy="beforeInteractive"
       />
 
-      <div className="text-surface-500 h-lvh text-sm leading-6 md:grid md:grid-cols-[270px_1fr]">
+      <div className="text-surface-500 h-lvh text-sm leading-6">
         <Sidebar />
         {children}
       </div>
