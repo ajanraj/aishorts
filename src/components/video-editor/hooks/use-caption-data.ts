@@ -55,6 +55,12 @@ export const useCaptionData = (
       activeSegment &&
       (!activeSegment?.wordTimings || !activeSegment?.wordTimings.length)
     ) {
+      console.log("use-caption-data getCurrentWordsData wordtimings", {
+        displayText: activeSegment.text,
+        words: [
+          { text: activeSegment.text, isActive: true, isCompleted: false },
+        ],
+      });
       return {
         displayText: activeSegment.text,
         words: [
@@ -116,6 +122,10 @@ export const useCaptionData = (
     }
 
     const displayText = displayWords.map((w) => w.text).join(" ");
+    console.log("use-caption-data getCurrentWordsData", {
+      displayText,
+      words: displayWords,
+    });
 
     return { displayText, words: displayWords };
   };

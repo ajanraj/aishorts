@@ -199,7 +199,7 @@ All API responses follow a consistent JSON format:
 ### Audio Generation
 
 #### `POST /api/text-to-speech`
-**Purpose**: Generate speech audio from text using OpenAI TTS and store in R2.
+**Purpose**: Generate speech audio from text using OpenAI TTS with word-level timestamps and store in R2.
 
 **Authentication**: Required
 
@@ -219,14 +219,79 @@ All API responses follow a consistent JSON format:
 {
   "audioUrl": "https://r2-url/audio.mp3",
   "key": "r2-storage-key",
-  "projectId": "project-id"
+  "projectId": "project-id",
+  "duration": 5.2, // Audio duration in seconds
+  "wordTimings": [ // Optional: Word-level timestamps
+    {
+      "word": "Hello",
+      "start": 0.0,
+      "end": 0.5
+    },
+    {
+      "word": "world",
+      "start": 0.5,
+      "end": 1.2
+    }
+  ]
 }
 ```
 
 **Notes**: 
-- Uses OpenAI `gpt-4o-mini-tts` model
+- Uses OpenAI `gpt-4o-mini-tts` model for audio generation
+- Uses OpenAI Whisper API for word-level timestamp generation
 - Audio files are uploaded to R2 storage automatically
+- Word timings are generated via transcription for precise caption synchronization
+- File metadata includes duration and word timings for database storage
 - Generates project ID if not provided
+
+---
+
+### Video Creation
+
+#### `POST /api/create-video`
+**Purpose**: Create a complete video project with parallelized image and audio generation.
+
+**Authentication**: Required
+
+**Request Body**:
+```json
+{
+  "script": "string", // Required: Complete video script
+  "videoType": "faceless", // Optional: Video type, default: "faceless"
+  "mediaType": "AI Images", // Optional: Media type, default: "AI Images"
+  "styleId": "string", // Optional: Image style identifier
+  "voice": "echo|alloy|fable|onyx|nova|shimmer" // Optional: Voice for TTS, default: "echo"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "projectId": "project-uuid",
+  "status": "generating",
+  "message": "Video generation started. Please wait while we process your video."
+}
+```
+
+**Processing Flow**:
+1. **Project Creation**: Creates new project in database with "generating" status
+2. **Script Processing**: Breaks script into 3-5 second chunks using AI
+3. **Image Prompt Generation**: Creates optimized prompts for each segment
+4. **Segment Creation**: Batch creates all video segments in database
+5. **Parallel Media Generation**: Simultaneously generates images and audio with word timings
+6. **Status Updates**: Updates segments with generated media URLs and word timing data
+7. **Project Completion**: Sets project status to "completed" or "failed"
+
+**Background Processing**: 
+- All media generation happens asynchronously after initial response
+- Use polling on `GET /api/projects/{projectId}` to monitor progress
+- Project status changes: `generating` → `completed` | `failed`
+
+**Error Handling**:
+- Individual media generation failures don't stop the entire process
+- Failed generations are logged but processing continues
+- Project marked as "failed" only if critical steps fail
 
 ---
 
@@ -450,6 +515,20 @@ All API responses follow a consistent JSON format:
       "duration": 5.0,
       "audioVolume": 1.0,
       "playBackRate": 1.0,
+      "imageUrl": "https://r2-url/image.jpg", // Generated image URL
+      "audioUrl": "https://r2-url/audio.mp3", // Generated audio URL
+      "wordTimings": [ // Word-level timestamps for captions
+        {
+          "word": "Segment",
+          "start": 0.0,
+          "end": 0.4
+        },
+        {
+          "word": "text",
+          "start": 0.4,
+          "end": 0.8
+        }
+      ],
       // ... other segment fields
     }
   ],
@@ -475,7 +554,13 @@ All API responses follow a consistent JSON format:
   "playBackRate": number, // Optional: 0.5-2, default 1.0
   "withBlur": boolean, // Optional: default false
   "backgroundMinimized": boolean, // Optional: default false
-  "wordTimings": {...} // Optional: Word timing data
+  "wordTimings": [ // Optional: Word timing data for captions
+    {
+      "word": "string", // Individual word
+      "start": number, // Start time in seconds
+      "end": number // End time in seconds
+    }
+  ]
 }
 ```
 
@@ -874,25 +959,49 @@ bucket/
 - Secure filename sanitization
 - MIME type verification
 
+## Video Generation Architecture
+
+### Centralized Service Layer
+The application uses a centralized `VideoGenerationService` that orchestrates the entire video creation process:
+
+- **Script Processing**: Breaks scripts into optimal 3-5 second chunks
+- **Prompt Optimization**: Generates AI-optimized image prompts for each segment
+- **Parallel Media Generation**: Simultaneous image and audio generation for faster processing
+- **Word Timing Integration**: Automatic word-level timestamp generation for captions
+- **Database Management**: Handles all project, segment, and file record creation/updates
+
+### Processing Pipeline
+1. **Input Validation**: Script content and parameters validation
+2. **Segmentation**: AI-powered script breakdown into video segments
+3. **Prompt Generation**: Style-aware image prompt creation
+4. **Media Generation**: Parallel processing of images and audio
+5. **Transcription**: Word-level timestamp extraction from generated audio
+6. **Storage**: R2 upload and database record creation
+7. **Assembly**: Project completion with all media assets linked
+
 ## External Services
 
 ### OpenAI API
-- **Script Generation**: GPT-4o models for script creation
-- **Image Prompts**: GPT-4o for optimizing image prompts  
-- **Text-to-Speech**: `gpt-4o-mini-tts` for audio generation
-- **Image Generation**: DALL-E 3 for image creation
+- **Script Generation**: GPT-4o models for script creation and segmentation
+- **Image Prompts**: GPT-4o for style-optimized image prompt generation  
+- **Text-to-Speech**: `gpt-4o-mini-tts` for high-quality audio generation
+- **Transcription**: Whisper API for word-level timestamp extraction
+- **Image Generation**: DALL-E 3 for photorealistic image creation
 
 ### FalAI
-- **Image Generation**: Flux models (flux-1.1-pro, flux-schnell)
-- Fallback service for image generation
+- **Image Generation**: Flux models (flux-1.1-pro, flux-schnell, flux-dev)
+- **High Performance**: Faster generation times for video content
+- **Style Flexibility**: Support for various artistic styles and quality levels
 
 ### Lemon Squeezy
 - **Subscription Billing**: Webhook-based event processing
 - **Customer Portal**: Redirect URLs for billing management
 
 ### Cloudflare R2
-- **File Storage**: Primary storage for all media files
+- **File Storage**: Primary storage for all media files (images, audio, video)
 - **CDN**: Global content delivery for fast access
+- **Organized Structure**: User/project/segment-based file organization
+- **Scalability**: Handles large media files with automatic optimization
 
 ## Development Notes
 
@@ -904,6 +1013,19 @@ Located in `src/db/schema.ts` using Drizzle ORM with PostgreSQL.
 
 ### Type Safety
 All API routes use Zod for request validation and TypeScript for type safety.
+
+### Word Timings & Captions
+- **Generation**: Automatic word-level timestamps created during audio generation
+- **Storage**: Word timings stored as JSONB in segment database records
+- **Format**: `{ word: string, start: number, end: number }` for each word
+- **Usage**: Powers dynamic video captions with precise synchronization
+- **Integration**: Seamlessly integrated with Remotion video rendering
+
+### Video Generation Performance
+- **Parallelization**: Images and audio generated simultaneously (~70% faster)
+- **Background Processing**: Non-blocking API responses with status polling
+- **Error Handling**: Individual failures don't stop entire video generation
+- **Scalability**: Handles multiple concurrent video generations
 
 ### Testing
 Use `/api/test-r2` and `/api/health` endpoints to verify system status.
