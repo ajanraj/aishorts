@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import { ProjectService } from "@/lib/project-service";
 import { getImageStyle, getDefaultImageStyle } from "@/lib/image-config";
-import { getAudioDurationWithFallback } from "@/lib/audio-utils";
 import { FalAIService } from "@/lib/falai-service";
 import { OpenAIService } from "@/lib/openai-service";
 import { R2Storage } from "@/lib/r2-storage";
@@ -622,7 +621,7 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
       `project_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     // Get duration from buffer
-    const duration = getMP3Duration(buffer) || estimateMP3Duration(buffer);
+    let duration;
 
     // Generate word-level timestamps using transcription service and convert to batches
     let wordTimings: any[] | undefined;
@@ -639,6 +638,7 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
         3,
       );
 
+      duration = transcriptionResult.duration;
       wordTimings = batchedTimings;
       console.log(
         `Generated ${batchedTimings.length} batched word groups for single audio segment ${index}`,
