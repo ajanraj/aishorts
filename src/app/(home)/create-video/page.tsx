@@ -4,10 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  imageStyles,
-  getDefaultImageStyle,
-} from "@/lib/image-config";
+import { imageStyles, getDefaultImageStyle } from "@/lib/image-config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,13 +88,12 @@ const CreateVideoPage = () => {
 
       const { projectId, status, message } = await response.json();
       console.log("Video generation started:", { projectId, status, message });
-      
+
       setCurrentStep("Video generation started. Processing in background...");
       setProgress(10);
 
       // Start polling for completion
       pollProjectStatus(projectId);
-
     } catch (error) {
       console.error("Error generating video:", error);
       alert(
@@ -115,8 +111,10 @@ const CreateVideoPage = () => {
     const checkStatus = async () => {
       try {
         attempts++;
-        console.log(`Polling attempt ${attempts}/${maxAttempts} for project ${projectId}`);
-        
+        console.log(
+          `Polling attempt ${attempts}/${maxAttempts} for project ${projectId}`,
+        );
+
         const response = await fetch(`/api/projects/${projectId}`);
         if (!response.ok) {
           throw new Error("Failed to check project status");
@@ -127,10 +125,15 @@ const CreateVideoPage = () => {
 
         // Update progress based on status
         if (project.status === "generating") {
-          const progressPercent = Math.min(20 + (attempts * 60) / maxAttempts, 90);
+          const progressPercent = Math.min(
+            20 + (attempts * 60) / maxAttempts,
+            90,
+          );
           setProgress(progressPercent);
-          setCurrentStep(`Generating video... (${Math.round(progressPercent)}%)`);
-          
+          setCurrentStep(
+            `Generating video... (${Math.round(progressPercent)}%)`,
+          );
+
           // Continue polling only if still generating
           if (attempts < maxAttempts) {
             setTimeout(checkStatus, 3000); // Poll every 3 seconds
@@ -140,12 +143,12 @@ const CreateVideoPage = () => {
         } else if (project.status === "completed") {
           setCurrentStep("Video generation completed!");
           setProgress(100);
-          
+
           // Stop polling and redirect to video editor
           setTimeout(() => {
             router.push(`/video/${projectId}`);
           }, 2000);
-          
+
           setIsGenerating(false);
           return; // Stop polling
         } else if (project.status === "failed") {
@@ -160,12 +163,13 @@ const CreateVideoPage = () => {
             throw new Error("Video generation timeout");
           }
         }
-
       } catch (error) {
         console.error("Error checking project status:", error);
-        
+
         if (attempts >= maxAttempts) {
-          alert("Video generation timeout. Please check your project status manually.");
+          alert(
+            "Video generation timeout. Please check your project status manually.",
+          );
           setIsGenerating(false);
           return;
         }
@@ -325,7 +329,6 @@ const CreateVideoPage = () => {
               selectedVoice={selectedVoice}
               onVoiceSelect={setSelectedVoice}
             />
-
 
             {/* Generate button */}
             <div className="space-y-4">

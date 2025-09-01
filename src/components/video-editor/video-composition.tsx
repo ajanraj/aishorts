@@ -16,7 +16,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
 }) => {
   const { getSegmentsToRender, fps } = useSegmentTiming(video);
   const segmentsToRender = getSegmentsToRender();
-  console.log("thoufic video in videocomposition", video);
+  // console.log("thoufic video in videocomposition", video);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#1a1a1a" }}>

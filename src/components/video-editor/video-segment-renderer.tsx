@@ -63,10 +63,7 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
 
   // Calculate frames for this segment
   const segmentFrames = Math.round(segment.duration * fps);
-  console.log("thoufic sements", {
-    segduration: segment.duration,
-    segmentFrames,
-  });
+
   const startFrame = segments
     .slice(0, originalIndex)
     .reduce((acc, seg) => acc + Math.round(seg.duration * fps), 0);

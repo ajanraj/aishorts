@@ -1,3 +1,5 @@
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 import OpenAI from "openai";
 import { getScriptStyle } from "@/lib/script-config";
 import { R2Storage } from "@/lib/r2-storage";
@@ -42,6 +44,13 @@ export class OpenAIService {
     return this.openai;
   }
 
+  private static getOpenAIProvider() {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OpenAI API key not found in environment variables");
+    }
+    return openai;
+  }
+
   static async generateScript({
     userPrompt,
     scriptStyleId,
@@ -52,7 +61,7 @@ export class OpenAIService {
     error?: string;
   }> {
     try {
-      const client = this.getClient();
+      const provider = this.getOpenAIProvider();
       const style = getScriptStyle(scriptStyleId);
 
       if (!style) {
@@ -72,24 +81,13 @@ export class OpenAIService {
         duration,
       );
 
-      const response = await client.chat.completions.create({
-        model: style.model,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: contextualPrompt,
-          },
-        ],
-        max_tokens: 1000,
+      const { text: script } = await generateText({
+        model: provider(style.model),
+        system: systemPrompt,
+        prompt: contextualPrompt,
+        maxOutputTokens: 1000,
         temperature: 0.8,
-        top_p: 0.9,
       });
-
-      const script = response.choices[0]?.message?.content;
 
       if (!script) {
         return {

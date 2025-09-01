@@ -26,9 +26,11 @@ export default function DashboardLayout({
       />
 
       <SidebarProvider>
-        <div className="text-surface-500 h-lvh text-sm leading-6 md:grid md:grid-cols-[270px_1fr]">
-          <Sidebar />
-          <div className="flex flex-col">
+        <div className="text-surface-500 flex h-lvh w-full text-sm leading-6">
+          <div className="flex-0">
+            <Sidebar />
+          </div>
+          <div className="flex w-full flex-1 flex-col">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:hidden">
               <SidebarTrigger />
               <div className="flex items-center gap-2">
@@ -36,7 +38,7 @@ export default function DashboardLayout({
                 <span className="text-lg font-bold">CursorShorts</span>
               </div>
             </header>
-            <div className="flex-1 overflow-hidden">{children}</div>
+            <div className="w-full flex-1 overflow-y-auto">{children}</div>
           </div>
         </div>
       </SidebarProvider>

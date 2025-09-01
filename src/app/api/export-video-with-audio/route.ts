@@ -32,13 +32,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: "Video export functionality is not available. Missing required Remotion dependencies.",
-            details: errorResponse.error || "The export-video endpoint is not properly configured.",
+            error:
+              "Video export functionality is not available. Missing required Remotion dependencies.",
+            details:
+              errorResponse.error ||
+              "The export-video endpoint is not properly configured.",
           },
-          { status: 503 }
+          { status: 503 },
         );
       }
-      throw new Error(`Failed to export video (${videoExportResponse.status}): ${errorResponse.error || 'Unknown error'}`);
+      throw new Error(
+        `Failed to export video (${videoExportResponse.status}): ${errorResponse.error || "Unknown error"}`,
+      );
     }
 
     const videoResult = await videoExportResponse.json();

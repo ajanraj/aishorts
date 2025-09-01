@@ -22,7 +22,7 @@ const getCurrentWordsData = (
   // Find the current active batch from pre-batched word timings
   let currentBatch: WordTiming | null = null;
 
-  for (const batch of segment.wordTimings[0]) {
+  for (const batch of segment.wordTimings) {
     // Check if this batch is active (current time is within batch time range)
     const batchHasStarted = segmentTime >= batch.start;
     const batchIsActive = segmentTime <= batch.end;

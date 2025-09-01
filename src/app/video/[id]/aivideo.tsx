@@ -264,7 +264,6 @@ const videoData: VideoData = {
           height: 1920,
           borderRadius: 10,
           volume: 0,
-          _id: "68af342b49dce09167063ffe",
         },
       ],
       elements: [],

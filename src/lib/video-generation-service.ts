@@ -247,13 +247,13 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
       console.log(`Generating word timestamps for segment ${index}...`);
       const transcriptionResult =
         await TranscriptionService.transcribeAudio(buffer);
-      
+
       // Convert flat word timings to batched structure (default 3 words per batch)
       const batchedTimings = TranscriptionService.convertToWordBatches(
         transcriptionResult.words,
-        3
+        3,
       );
-      
+
       wordTimings = batchedTimings;
       duration = transcriptionResult.duration;
       console.log(
@@ -632,13 +632,13 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
       );
       const transcriptionResult =
         await TranscriptionService.transcribeAudio(buffer);
-      
+
       // Convert flat word timings to batched structure (default 3 words per batch)
       const batchedTimings = TranscriptionService.convertToWordBatches(
         transcriptionResult.words,
-        3
+        3,
       );
-      
+
       wordTimings = batchedTimings;
       console.log(
         `Generated ${batchedTimings.length} batched word groups for single audio segment ${index}`,
