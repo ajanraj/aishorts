@@ -68,11 +68,18 @@ const SegmentComponent: React.FC<SegmentComponentProps> = ({
     .slice(0, originalIndex)
     .reduce((acc, seg) => acc + Math.round(seg.duration * fps), 0);
 
-  // Create a subtle animation effect
-  const scaleEffect = interpolate(frame % 60, [0, 60], [1, 1.04], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Create a smooth zoom-in transition over the segment duration
+  const localFrame = frame - startFrame;
+  const scaleEffect = interpolate(
+    localFrame,
+    [0, segmentFrames],
+    [1, 1.1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: (t) => t * t * (3 - 2 * t), // Smooth ease-in-out (smoothstep)
+    }
+  );
 
   // Get caption style and check if captions should be rendered
   const captionStyle = getCaptionStyle(video);
