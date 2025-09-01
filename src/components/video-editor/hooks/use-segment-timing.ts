@@ -35,7 +35,7 @@ export const useSegmentTiming = (video: Video) => {
   const getSegmentsToRender = () => {
     const currentSegmentIndex = (() => {
       let cumulativeFrames = 0;
-      for (let i = 0; i < video.segments.length; i++) {
+      for (let i = 0; i < video?.segments.length; i++) {
         const segmentFrames = Math.round(video.segments[i].duration * fps);
         const segmentEndFrame = cumulativeFrames + segmentFrames;
         if (frame >= cumulativeFrames && frame < segmentEndFrame) {
@@ -43,18 +43,18 @@ export const useSegmentTiming = (video: Video) => {
         }
         cumulativeFrames = segmentEndFrame;
       }
-      return video.segments.length - 1;
+      return video?.segments.length - 1;
     })();
 
     // Render current segment and ±1 adjacent segments
     const windowSize = 1;
     const startIndex = Math.max(0, currentSegmentIndex - windowSize);
     const endIndex = Math.min(
-      video.segments.length - 1,
+      video?.segments.length - 1,
       currentSegmentIndex + windowSize,
     );
 
-    return video.segments
+    return video?.segments
       .slice(startIndex, endIndex + 1)
       .map((segment, relativeIndex) => ({
         segment,

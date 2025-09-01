@@ -10,7 +10,7 @@ import {
 } from "remotion";
 import type { VideoSegment, Video as VideoType } from "@/types/video";
 import { SegmentCaption } from "./segment-caption";
-import { getCaptionStyle, shouldRenderCaptions } from "@/lib/caption-utils";
+import { getCaptionStyle, shouldRenderCaptions } from "../../lib/caption-utils";
 
 interface VideoSegmentRendererProps {
   segmentsToRender: Array<{
@@ -30,7 +30,7 @@ export const VideoSegmentRenderer: React.FC<VideoSegmentRendererProps> = ({
 }) => {
   return (
     <>
-      {segmentsToRender.map(({ segment, originalIndex }) => (
+      {segmentsToRender?.map(({ segment, originalIndex }) => (
         <SegmentComponent
           key={segment.id || segment._id}
           segment={segment}

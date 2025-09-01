@@ -1,18 +1,13 @@
 "use client";
 
 import React from "react";
-import {
-  Composition,
-  AbsoluteFill,
-} from "remotion";
-import type {
-  Video as VideoType,
-} from "@/types/video";
+import { Composition, AbsoluteFill } from "remotion";
+import type { Video as VideoType } from "@/types/video";
 import { useSegmentTiming } from "./hooks/use-segment-timing";
 import { VideoSegmentRenderer } from "./video-segment-renderer";
 import { VideoWatermark } from "./video-watermark";
 
-interface VideoCompositionProps {
+export interface VideoCompositionProps {
   video: VideoType;
 }
 
@@ -21,6 +16,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
 }) => {
   const { getSegmentsToRender, fps } = useSegmentTiming(video);
   const segmentsToRender = getSegmentsToRender();
+  console.log("thoufic video in videocomposition", video);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#1a1a1a" }}>
@@ -28,12 +24,12 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
       <VideoSegmentRenderer
         segmentsToRender={segmentsToRender}
         fps={fps}
-        segments={video.segments}
+        segments={video?.segments}
         video={video}
       />
 
       {/* Watermark */}
-      <VideoWatermark show={!!video.watermark} />
+      <VideoWatermark show={!!video?.watermark} />
     </AbsoluteFill>
   );
 };

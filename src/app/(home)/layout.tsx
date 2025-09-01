@@ -36,9 +36,7 @@ export default function DashboardLayout({
                 <span className="text-lg font-bold">CursorShorts</span>
               </div>
             </header>
-            <div className="flex-1 overflow-hidden">
-              {children}
-            </div>
+            <div className="flex-1 overflow-hidden">{children}</div>
           </div>
         </div>
       </SidebarProvider>
