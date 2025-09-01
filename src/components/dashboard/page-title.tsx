@@ -20,11 +20,11 @@ export const PageTitle = forwardRef<
     >
       <div className="flex items-center justify-between">
         <h1 className="text-2xl text-foreground">{children}</h1>
-        {action}
+        {/* {action} */}
       </div>
 
       {props.subtitle && (
-        <p className="text-base leading-8 text-surface-500">{props.subtitle}</p>
+        <p className="text-surface-500 text-base leading-8">{props.subtitle}</p>
       )}
     </header>
   );

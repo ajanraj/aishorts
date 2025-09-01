@@ -14,8 +14,8 @@ export function DashboardContent(
   const { action, className, subtitle, children, title } = props;
 
   return (
-    <div className="size-full overflow-y-auto py-10">
-      <main className={cn("container mx-auto w-full max-w-4xl", className)}>
+    <div className="size-full overflow-y-auto py-6 md:py-10">
+      <main className={cn("container mx-auto w-full max-w-4xl px-4 md:px-0", className)}>
         {title ? (
           <PageTitle subtitle={subtitle} action={action}>
             {title}
