@@ -36,92 +36,91 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 0,
       wordTimings: [
-        [
-          {
-            end: 0.699999988079071,
-            text: "if you find",
-            start: 0,
-            words: [
-              {
-                end: 0.2199999988079071,
-                text: "if",
-                start: 0,
-              },
-              {
-                end: 0.4399999976158142,
-                text: "you",
-                start: 0.2199999988079071,
-              },
-              {
-                end: 0.699999988079071,
-                text: "find",
-                start: 0.4399999976158142,
-              },
-            ],
-          },
-          {
-            end: 2.119999885559082,
-            text: "yourself in a",
-            start: 0.699999988079071,
-            words: [
-              {
-                end: 1.1399999856948853,
-                text: "yourself",
-                start: 0.699999988079071,
-              },
-              {
-                end: 1.559999942779541,
-                text: "in",
-                start: 1.1399999856948853,
-              },
-              {
-                end: 2.119999885559082,
-                text: "a",
-                start: 1.559999942779541,
-              },
-            ],
-          },
-          {
-            end: 2.8399999141693115,
-            text: "factory on a",
-            start: 2.119999885559082,
-            words: [
-              {
-                end: 2.119999885559082,
-                text: "factory",
-                start: 2.119999885559082,
-              },
-              {
-                end: 2.5799999237060547,
-                text: "on",
-                start: 2.119999885559082,
-              },
-              {
-                end: 2.8399999141693115,
-                text: "a",
-                start: 2.5799999237060547,
-              },
-            ],
-          },
-          {
-            end: 3.440000057220459,
-            text: "small island",
-            start: 2.8399999141693115,
-            words: [
-              {
-                end: 3.140000104904175,
-                text: "small",
-                start: 2.8399999141693115,
-              },
-              {
-                end: 3.440000057220459,
-                text: "island",
-                start: 3.140000104904175,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.699999988079071,
+          text: "if you find",
+          start: 0,
+          words: [
+            {
+              end: 0.2199999988079071,
+              text: "if",
+              start: 0,
+            },
+            {
+              end: 0.4399999976158142,
+              text: "you",
+              start: 0.2199999988079071,
+            },
+            {
+              end: 0.699999988079071,
+              text: "find",
+              start: 0.4399999976158142,
+            },
+          ],
+        },
+        {
+          end: 2.119999885559082,
+          text: "yourself in a",
+          start: 0.699999988079071,
+          words: [
+            {
+              end: 1.1399999856948853,
+              text: "yourself",
+              start: 0.699999988079071,
+            },
+            {
+              end: 1.559999942779541,
+              text: "in",
+              start: 1.1399999856948853,
+            },
+            {
+              end: 2.119999885559082,
+              text: "a",
+              start: 1.559999942779541,
+            },
+          ],
+        },
+        {
+          end: 2.8399999141693115,
+          text: "factory on a",
+          start: 2.119999885559082,
+          words: [
+            {
+              end: 2.119999885559082,
+              text: "factory",
+              start: 2.119999885559082,
+            },
+            {
+              end: 2.5799999237060547,
+              text: "on",
+              start: 2.119999885559082,
+            },
+            {
+              end: 2.8399999141693115,
+              text: "a",
+              start: 2.5799999237060547,
+            },
+          ],
+        },
+        {
+          end: 3.440000057220459,
+          text: "small island",
+          start: 2.8399999141693115,
+          words: [
+            {
+              end: 3.140000104904175,
+              text: "small",
+              start: 2.8399999141693115,
+            },
+            {
+              end: 3.440000057220459,
+              text: "island",
+              start: 3.140000104904175,
+            },
+          ],
+        },
       ],
+
       media: [],
       elements: [],
     },
@@ -142,74 +141,72 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 1,
       wordTimings: [
-        [
-          {
-            end: 0.9599999785423279,
-            text: "and your reflection",
-            start: 0,
-            words: [
-              {
-                end: 0.2800000011920929,
-                text: "and",
-                start: 0,
-              },
-              {
-                end: 0.4399999976158142,
-                text: "your",
-                start: 0.2800000011920929,
-              },
-              {
-                end: 0.9599999785423279,
-                text: "reflection",
-                start: 0.4399999976158142,
-              },
-            ],
-          },
-          {
-            end: 1.8799999952316284,
-            text: "isn't in the",
-            start: 0.9599999785423279,
-            words: [
-              {
-                end: 1.440000057220459,
-                text: "isn't",
-                start: 0.9599999785423279,
-              },
-              {
-                end: 1.6399999856948853,
-                text: "in",
-                start: 1.440000057220459,
-              },
-              {
-                end: 1.8799999952316284,
-                text: "the",
-                start: 1.6399999856948853,
-              },
-            ],
-          },
-          {
-            end: 3.319999933242798,
-            text: "mirror Listen carefully",
-            start: 1.8799999952316284,
-            words: [
-              {
-                end: 2.059999942779541,
-                text: "mirror",
-                start: 1.8799999952316284,
-              },
-              {
-                end: 2.880000114440918,
-                text: "Listen",
-                start: 2.880000114440918,
-              },
-              {
-                end: 3.319999933242798,
-                text: "carefully",
-                start: 2.880000114440918,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.9599999785423279,
+          text: "and your reflection",
+          start: 0,
+          words: [
+            {
+              end: 0.2800000011920929,
+              text: "and",
+              start: 0,
+            },
+            {
+              end: 0.4399999976158142,
+              text: "your",
+              start: 0.2800000011920929,
+            },
+            {
+              end: 0.9599999785423279,
+              text: "reflection",
+              start: 0.4399999976158142,
+            },
+          ],
+        },
+        {
+          end: 1.8799999952316284,
+          text: "isn't in the",
+          start: 0.9599999785423279,
+          words: [
+            {
+              end: 1.440000057220459,
+              text: "isn't",
+              start: 0.9599999785423279,
+            },
+            {
+              end: 1.6399999856948853,
+              text: "in",
+              start: 1.440000057220459,
+            },
+            {
+              end: 1.8799999952316284,
+              text: "the",
+              start: 1.6399999856948853,
+            },
+          ],
+        },
+        {
+          end: 3.319999933242798,
+          text: "mirror Listen carefully",
+          start: 1.8799999952316284,
+          words: [
+            {
+              end: 2.059999942779541,
+              text: "mirror",
+              start: 1.8799999952316284,
+            },
+            {
+              end: 2.880000114440918,
+              text: "Listen",
+              start: 2.880000114440918,
+            },
+            {
+              end: 3.319999933242798,
+              text: "carefully",
+              start: 2.880000114440918,
+            },
+          ],
+        },
       ],
       media: [],
       elements: [],
@@ -231,30 +228,28 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 2,
       wordTimings: [
-        [
-          {
-            end: 0.800000011920929,
-            text: "First don't run",
-            start: 0,
-            words: [
-              {
-                end: 0.3400000035762787,
-                text: "First",
-                start: 0,
-              },
-              {
-                end: 0.6399999856948853,
-                text: "don't",
-                start: 0.47999998927116394,
-              },
-              {
-                end: 0.800000011920929,
-                text: "run",
-                start: 0.6399999856948853,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.800000011920929,
+          text: "First don't run",
+          start: 0,
+          words: [
+            {
+              end: 0.3400000035762787,
+              text: "First",
+              start: 0,
+            },
+            {
+              end: 0.6399999856948853,
+              text: "don't",
+              start: 0.47999998927116394,
+            },
+            {
+              end: 0.800000011920929,
+              text: "run",
+              start: 0.6399999856948853,
+            },
+          ],
+        },
       ],
       media: [],
       elements: [],
@@ -276,69 +271,67 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 3,
       wordTimings: [
-        [
-          {
-            end: 0.8399999737739563,
-            text: "Second if you",
-            start: 0,
-            words: [
-              {
-                end: 0.47999998927116394,
-                text: "Second",
-                start: 0,
-              },
-              {
-                end: 0.6800000071525574,
-                text: "if",
-                start: 0.6600000262260437,
-              },
-              {
-                end: 0.8399999737739563,
-                text: "you",
-                start: 0.6800000071525574,
-              },
-            ],
-          },
-          {
-            end: 2.0399999618530273,
-            text: "hear footsteps behind",
-            start: 0.8399999737739563,
-            words: [
-              {
-                end: 1.059999942779541,
-                text: "hear",
-                start: 0.8399999737739563,
-              },
-              {
-                end: 1.5399999618530273,
-                text: "footsteps",
-                start: 1.059999942779541,
-              },
-              {
-                end: 2.0399999618530273,
-                text: "behind",
-                start: 1.5399999618530273,
-              },
-            ],
-          },
-          {
-            end: 2.880000114440918,
-            text: "you stop",
-            start: 2.0399999618530273,
-            words: [
-              {
-                end: 2.240000009536743,
-                text: "you",
-                start: 2.0399999618530273,
-              },
-              {
-                end: 2.880000114440918,
-                text: "stop",
-                start: 2.619999885559082,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.8399999737739563,
+          text: "Second if you",
+          start: 0,
+          words: [
+            {
+              end: 0.47999998927116394,
+              text: "Second",
+              start: 0,
+            },
+            {
+              end: 0.6800000071525574,
+              text: "if",
+              start: 0.6600000262260437,
+            },
+            {
+              end: 0.8399999737739563,
+              text: "you",
+              start: 0.6800000071525574,
+            },
+          ],
+        },
+        {
+          end: 2.0399999618530273,
+          text: "hear footsteps behind",
+          start: 0.8399999737739563,
+          words: [
+            {
+              end: 1.059999942779541,
+              text: "hear",
+              start: 0.8399999737739563,
+            },
+            {
+              end: 1.5399999618530273,
+              text: "footsteps",
+              start: 1.059999942779541,
+            },
+            {
+              end: 2.0399999618530273,
+              text: "behind",
+              start: 1.5399999618530273,
+            },
+          ],
+        },
+        {
+          end: 2.880000114440918,
+          text: "you stop",
+          start: 2.0399999618530273,
+          words: [
+            {
+              end: 2.240000009536743,
+              text: "you",
+              start: 2.0399999618530273,
+            },
+            {
+              end: 2.880000114440918,
+              text: "stop",
+              start: 2.619999885559082,
+            },
+          ],
+        },
       ],
       media: [],
       elements: [],
@@ -360,65 +353,64 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 4,
       wordTimings: [
-        [
-          {
-            end: 0.7400000095367432,
-            text: "If they stop",
-            start: 0,
-            words: [
-              {
-                end: 0.2199999988079071,
-                text: "If",
-                start: 0,
-              },
-              {
-                end: 0.41999998688697815,
-                text: "they",
-                start: 0.2199999988079071,
-              },
-              {
-                end: 0.7400000095367432,
-                text: "stop",
-                start: 0.41999998688697815,
-              },
-            ],
-          },
-          {
-            end: 1.840000033378601,
-            text: "to don't look",
-            start: 0.7400000095367432,
-            words: [
-              {
-                end: 1.0199999809265137,
-                text: "to",
-                start: 0.7400000095367432,
-              },
-              {
-                end: 1.6799999475479126,
-                text: "don't",
-                start: 1.4600000381469727,
-              },
-              {
-                end: 1.840000033378601,
-                text: "look",
-                start: 1.6799999475479126,
-              },
-            ],
-          },
-          {
-            end: 2.180000066757202,
-            text: "back",
-            start: 1.840000033378601,
-            words: [
-              {
-                end: 2.180000066757202,
-                text: "back",
-                start: 1.840000033378601,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.7400000095367432,
+          text: "If they stop",
+          start: 0,
+          words: [
+            {
+              end: 0.2199999988079071,
+              text: "If",
+              start: 0,
+            },
+            {
+              end: 0.41999998688697815,
+              text: "they",
+              start: 0.2199999988079071,
+            },
+            {
+              end: 0.7400000095367432,
+              text: "stop",
+              start: 0.41999998688697815,
+            },
+          ],
+        },
+        {
+          end: 1.840000033378601,
+          text: "to don't look",
+          start: 0.7400000095367432,
+          words: [
+            {
+              end: 1.0199999809265137,
+              text: "to",
+              start: 0.7400000095367432,
+            },
+            {
+              end: 1.6799999475479126,
+              text: "don't",
+              start: 1.4600000381469727,
+            },
+            {
+              end: 1.840000033378601,
+              text: "look",
+              start: 1.6799999475479126,
+            },
+          ],
+        },
+        {
+          end: 2.180000066757202,
+          text: "back",
+          start: 1.840000033378601,
+          words: [
+            {
+              end: 2.180000066757202,
+              text: "back",
+              start: 1.840000033378601,
+            },
+          ],
+        },
       ],
+
       media: [],
       elements: [],
     },
@@ -439,109 +431,108 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 5,
       wordTimings: [
-        [
-          {
-            end: 0.8799999952316284,
-            text: "Third if the",
-            start: 0,
-            words: [
-              {
-                end: 0.4399999976158142,
-                text: "Third",
-                start: 0,
-              },
-              {
-                end: 0.6800000071525574,
-                text: "if",
-                start: 0.5600000023841858,
-              },
-              {
-                end: 0.8799999952316284,
-                text: "the",
-                start: 0.6800000071525574,
-              },
-            ],
-          },
-          {
-            end: 1.7599999904632568,
-            text: "lights flicker and",
-            start: 0.8799999952316284,
-            words: [
-              {
-                end: 1.0800000429153442,
-                text: "lights",
-                start: 0.8799999952316284,
-              },
-              {
-                end: 1.5199999809265137,
-                text: "flicker",
-                start: 1.0800000429153442,
-              },
-              {
-                end: 1.7599999904632568,
-                text: "and",
-                start: 1.5199999809265137,
-              },
-            ],
-          },
-          {
-            end: 2.200000047683716,
-            text: "you see a",
-            start: 1.7599999904632568,
-            words: [
-              {
-                end: 1.9199999570846558,
-                text: "you",
-                start: 1.7599999904632568,
-              },
-              {
-                end: 2.0199999809265137,
-                text: "see",
-                start: 1.9199999570846558,
-              },
-              {
-                end: 2.200000047683716,
-                text: "a",
-                start: 2.0199999809265137,
-              },
-            ],
-          },
-          {
-            end: 2.680000066757202,
-            text: "face in the",
-            start: 2.200000047683716,
-            words: [
-              {
-                end: 2.380000114440918,
-                text: "face",
-                start: 2.200000047683716,
-              },
-              {
-                end: 2.5199999809265137,
-                text: "in",
-                start: 2.380000114440918,
-              },
-              {
-                end: 2.680000066757202,
-                text: "the",
-                start: 2.5199999809265137,
-              },
-            ],
-          },
-          {
-            end: 2.819999933242798,
-            text: "dark",
-            start: 2.680000066757202,
-            words: [
-              {
-                end: 2.819999933242798,
-                text: "dark",
-                start: 2.680000066757202,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.8799999952316284,
+          text: "Third if the",
+          start: 0,
+          words: [
+            {
+              end: 0.4399999976158142,
+              text: "Third",
+              start: 0,
+            },
+            {
+              end: 0.6800000071525574,
+              text: "if",
+              start: 0.5600000023841858,
+            },
+            {
+              end: 0.8799999952316284,
+              text: "the",
+              start: 0.6800000071525574,
+            },
+          ],
+        },
+        {
+          end: 1.7599999904632568,
+          text: "lights flicker and",
+          start: 0.8799999952316284,
+          words: [
+            {
+              end: 1.0800000429153442,
+              text: "lights",
+              start: 0.8799999952316284,
+            },
+            {
+              end: 1.5199999809265137,
+              text: "flicker",
+              start: 1.0800000429153442,
+            },
+            {
+              end: 1.7599999904632568,
+              text: "and",
+              start: 1.5199999809265137,
+            },
+          ],
+        },
+        {
+          end: 2.200000047683716,
+          text: "you see a",
+          start: 1.7599999904632568,
+          words: [
+            {
+              end: 1.9199999570846558,
+              text: "you",
+              start: 1.7599999904632568,
+            },
+            {
+              end: 2.0199999809265137,
+              text: "see",
+              start: 1.9199999570846558,
+            },
+            {
+              end: 2.200000047683716,
+              text: "a",
+              start: 2.0199999809265137,
+            },
+          ],
+        },
+        {
+          end: 2.680000066757202,
+          text: "face in the",
+          start: 2.200000047683716,
+          words: [
+            {
+              end: 2.380000114440918,
+              text: "face",
+              start: 2.200000047683716,
+            },
+            {
+              end: 2.5199999809265137,
+              text: "in",
+              start: 2.380000114440918,
+            },
+            {
+              end: 2.680000066757202,
+              text: "the",
+              start: 2.5199999809265137,
+            },
+          ],
+        },
+        {
+          end: 2.819999933242798,
+          text: "dark",
+          start: 2.680000066757202,
+          words: [
+            {
+              end: 2.819999933242798,
+              text: "dark",
+              start: 2.680000066757202,
+            },
+          ],
+        },
       ],
+
       media: [],
       elements: [],
     },
@@ -561,43 +552,42 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 6,
       wordTimings: [
-        [
-          {
-            end: 1.3200000524520874,
-            text: "Link slowly and",
-            start: 0,
-            words: [
-              {
-                end: 0.41999998688697815,
-                text: "Link",
-                start: 0,
-              },
-              {
-                end: 0.8600000143051147,
-                text: "slowly",
-                start: 0.41999998688697815,
-              },
-              {
-                end: 1.3200000524520874,
-                text: "and",
-                start: 0.8600000143051147,
-              },
-            ],
-          },
-          {
-            end: 1.600000023841858,
-            text: "smile",
-            start: 1.3200000524520874,
-            words: [
-              {
-                end: 1.600000023841858,
-                text: "smile",
-                start: 1.3200000524520874,
-              },
-            ],
-          },
-        ],
+        {
+          end: 1.3200000524520874,
+          text: "Link slowly and",
+          start: 0,
+          words: [
+            {
+              end: 0.41999998688697815,
+              text: "Link",
+              start: 0,
+            },
+            {
+              end: 0.8600000143051147,
+              text: "slowly",
+              start: 0.41999998688697815,
+            },
+            {
+              end: 1.3200000524520874,
+              text: "and",
+              start: 0.8600000143051147,
+            },
+          ],
+        },
+        {
+          end: 1.600000023841858,
+          text: "smile",
+          start: 1.3200000524520874,
+          words: [
+            {
+              end: 1.600000023841858,
+              text: "smile",
+              start: 1.3200000524520874,
+            },
+          ],
+        },
       ],
+
       media: [],
       elements: [],
     },
@@ -618,75 +608,74 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 7,
       wordTimings: [
-        [
-          {
-            end: 0.9599999785423279,
-            text: "Fourth if you",
-            start: 0,
-            words: [
-              {
-                end: 0.5,
-                text: "Fourth",
-                start: 0,
-              },
-              {
-                end: 0.7799999713897705,
-                text: "if",
-                start: 0.699999988079071,
-              },
-              {
-                end: 0.9599999785423279,
-                text: "you",
-                start: 0.7799999713897705,
-              },
-            ],
-          },
-          {
-            end: 1.659999966621399,
-            text: "see a reflection",
-            start: 0.9599999785423279,
-            words: [
-              {
-                end: 1.100000023841858,
-                text: "see",
-                start: 0.9599999785423279,
-              },
-              {
-                end: 1.3200000524520874,
-                text: "a",
-                start: 1.100000023841858,
-              },
-              {
-                end: 1.659999966621399,
-                text: "reflection",
-                start: 1.3200000524520874,
-              },
-            ],
-          },
-          {
-            end: 2.319999933242798,
-            text: "in a puddle",
-            start: 1.659999966621399,
-            words: [
-              {
-                end: 2,
-                text: "in",
-                start: 1.659999966621399,
-              },
-              {
-                end: 2.1600000858306885,
-                text: "a",
-                start: 2,
-              },
-              {
-                end: 2.319999933242798,
-                text: "puddle",
-                start: 2.1600000858306885,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.9599999785423279,
+          text: "Fourth if you",
+          start: 0,
+          words: [
+            {
+              end: 0.5,
+              text: "Fourth",
+              start: 0,
+            },
+            {
+              end: 0.7799999713897705,
+              text: "if",
+              start: 0.699999988079071,
+            },
+            {
+              end: 0.9599999785423279,
+              text: "you",
+              start: 0.7799999713897705,
+            },
+          ],
+        },
+        {
+          end: 1.659999966621399,
+          text: "see a reflection",
+          start: 0.9599999785423279,
+          words: [
+            {
+              end: 1.100000023841858,
+              text: "see",
+              start: 0.9599999785423279,
+            },
+            {
+              end: 1.3200000524520874,
+              text: "a",
+              start: 1.100000023841858,
+            },
+            {
+              end: 1.659999966621399,
+              text: "reflection",
+              start: 1.3200000524520874,
+            },
+          ],
+        },
+        {
+          end: 2.319999933242798,
+          text: "in a puddle",
+          start: 1.659999966621399,
+          words: [
+            {
+              end: 2,
+              text: "in",
+              start: 1.659999966621399,
+            },
+            {
+              end: 2.1600000858306885,
+              text: "a",
+              start: 2,
+            },
+            {
+              end: 2.319999933242798,
+              text: "puddle",
+              start: 2.1600000858306885,
+            },
+          ],
+        },
       ],
+
       media: [],
       elements: [],
     },
@@ -707,69 +696,67 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 8,
       wordTimings: [
-        [
-          {
-            end: 0.7400000095367432,
-            text: "and it's smiling",
-            start: 0,
-            words: [
-              {
-                end: 0.20000000298023224,
-                text: "and",
-                start: 0,
-              },
-              {
-                end: 0.46000000834465027,
-                text: "it's",
-                start: 0.20000000298023224,
-              },
-              {
-                end: 0.7400000095367432,
-                text: "smiling",
-                start: 0.46000000834465027,
-              },
-            ],
-          },
-          {
-            end: 2.240000009536743,
-            text: "back wave and",
-            start: 0.7400000095367432,
-            words: [
-              {
-                end: 1.2599999904632568,
-                text: "back",
-                start: 0.7400000095367432,
-              },
-              {
-                end: 1.940000057220459,
-                text: "wave",
-                start: 1.940000057220459,
-              },
-              {
-                end: 2.240000009536743,
-                text: "and",
-                start: 1.940000057220459,
-              },
-            ],
-          },
-          {
-            end: 2.7799999713897705,
-            text: "walk away",
-            start: 2.240000009536743,
-            words: [
-              {
-                end: 2.4800000190734863,
-                text: "walk",
-                start: 2.240000009536743,
-              },
-              {
-                end: 2.7799999713897705,
-                text: "away",
-                start: 2.4800000190734863,
-              },
-            ],
-          },
-        ],
+        {
+          end: 0.7400000095367432,
+          text: "and it's smiling",
+          start: 0,
+          words: [
+            {
+              end: 0.20000000298023224,
+              text: "and",
+              start: 0,
+            },
+            {
+              end: 0.46000000834465027,
+              text: "it's",
+              start: 0.20000000298023224,
+            },
+            {
+              end: 0.7400000095367432,
+              text: "smiling",
+              start: 0.46000000834465027,
+            },
+          ],
+        },
+        {
+          end: 2.240000009536743,
+          text: "back wave and",
+          start: 0.7400000095367432,
+          words: [
+            {
+              end: 1.2599999904632568,
+              text: "back",
+              start: 0.7400000095367432,
+            },
+            {
+              end: 1.940000057220459,
+              text: "wave",
+              start: 1.940000057220459,
+            },
+            {
+              end: 2.240000009536743,
+              text: "and",
+              start: 1.940000057220459,
+            },
+          ],
+        },
+        {
+          end: 2.7799999713897705,
+          text: "walk away",
+          start: 2.240000009536743,
+          words: [
+            {
+              end: 2.4800000190734863,
+              text: "walk",
+              start: 2.240000009536743,
+            },
+            {
+              end: 2.7799999713897705,
+              text: "away",
+              start: 2.4800000190734863,
+            },
+          ],
+        },
       ],
       media: [],
       elements: [],
@@ -791,130 +778,128 @@ const video: VideoCompositionProps = {
       backgroundMinimized: false,
       order: 9,
       wordTimings: [
-        [
-          {
-            end: 1.2799999713897705,
-            text: "Lastly if you",
-            start: 0,
-            words: [
-              {
-                end: 0.6000000238418579,
-                text: "Lastly",
-                start: 0,
-              },
-              {
-                end: 1.059999942779541,
-                text: "if",
-                start: 0.9800000190734863,
-              },
-              {
-                end: 1.2799999713897705,
-                text: "you",
-                start: 1.059999942779541,
-              },
-            ],
-          },
-          {
-            end: 1.7000000476837158,
-            text: "wake up on",
-            start: 1.2799999713897705,
-            words: [
-              {
-                end: 1.440000057220459,
-                text: "wake",
-                start: 1.2799999713897705,
-              },
-              {
-                end: 1.600000023841858,
-                text: "up",
-                start: 1.440000057220459,
-              },
-              {
-                end: 1.7000000476837158,
-                text: "on",
-                start: 1.600000023841858,
-              },
-            ],
-          },
-          {
-            end: 2.4000000953674316,
-            text: "a different floor",
-            start: 1.7000000476837158,
-            words: [
-              {
-                end: 1.9199999570846558,
-                text: "a",
-                start: 1.7000000476837158,
-              },
-              {
-                end: 2.180000066757202,
-                text: "different",
-                start: 1.9199999570846558,
-              },
-              {
-                end: 2.4000000953674316,
-                text: "floor",
-                start: 2.180000066757202,
-              },
-            ],
-          },
-          {
-            end: 3.0399999618530273,
-            text: "of the factory",
-            start: 2.4000000953674316,
-            words: [
-              {
-                end: 2.559999942779541,
-                text: "of",
-                start: 2.4000000953674316,
-              },
-              {
-                end: 2.700000047683716,
-                text: "the",
-                start: 2.559999942779541,
-              },
-              {
-                end: 3.0399999618530273,
-                text: "factory",
-                start: 2.700000047683716,
-              },
-            ],
-          },
-          {
-            end: 4.21999979019165,
-            text: "sit down and",
-            start: 3.5399999618530273,
-            words: [
-              {
-                end: 3.6600000858306885,
-                text: "sit",
-                start: 3.5399999618530273,
-              },
-              {
-                end: 3.880000114440918,
-                text: "down",
-                start: 3.6600000858306885,
-              },
-              {
-                end: 4.21999979019165,
-                text: "and",
-                start: 3.880000114440918,
-              },
-            ],
-          },
-          {
-            end: 4.300000190734863,
-            text: "wait",
-            start: 4.21999979019165,
-            words: [
-              {
-                end: 4.300000190734863,
-                text: "wait",
-                start: 4.21999979019165,
-              },
-            ],
-          },
-        ],
+        {
+          end: 1.2799999713897705,
+          text: "Lastly if you",
+          start: 0,
+          words: [
+            {
+              end: 0.6000000238418579,
+              text: "Lastly",
+              start: 0,
+            },
+            {
+              end: 1.059999942779541,
+              text: "if",
+              start: 0.9800000190734863,
+            },
+            {
+              end: 1.2799999713897705,
+              text: "you",
+              start: 1.059999942779541,
+            },
+          ],
+        },
+        {
+          end: 1.7000000476837158,
+          text: "wake up on",
+          start: 1.2799999713897705,
+          words: [
+            {
+              end: 1.440000057220459,
+              text: "wake",
+              start: 1.2799999713897705,
+            },
+            {
+              end: 1.600000023841858,
+              text: "up",
+              start: 1.440000057220459,
+            },
+            {
+              end: 1.7000000476837158,
+              text: "on",
+              start: 1.600000023841858,
+            },
+          ],
+        },
+        {
+          end: 2.4000000953674316,
+          text: "a different floor",
+          start: 1.7000000476837158,
+          words: [
+            {
+              end: 1.9199999570846558,
+              text: "a",
+              start: 1.7000000476837158,
+            },
+            {
+              end: 2.180000066757202,
+              text: "different",
+              start: 1.9199999570846558,
+            },
+            {
+              end: 2.4000000953674316,
+              text: "floor",
+              start: 2.180000066757202,
+            },
+          ],
+        },
+        {
+          end: 3.0399999618530273,
+          text: "of the factory",
+          start: 2.4000000953674316,
+          words: [
+            {
+              end: 2.559999942779541,
+              text: "of",
+              start: 2.4000000953674316,
+            },
+            {
+              end: 2.700000047683716,
+              text: "the",
+              start: 2.559999942779541,
+            },
+            {
+              end: 3.0399999618530273,
+              text: "factory",
+              start: 2.700000047683716,
+            },
+          ],
+        },
+        {
+          end: 4.21999979019165,
+          text: "sit down and",
+          start: 3.5399999618530273,
+          words: [
+            {
+              end: 3.6600000858306885,
+              text: "sit",
+              start: 3.5399999618530273,
+            },
+            {
+              end: 3.880000114440918,
+              text: "down",
+              start: 3.6600000858306885,
+            },
+            {
+              end: 4.21999979019165,
+              text: "and",
+              start: 3.880000114440918,
+            },
+          ],
+        },
+        {
+          end: 4.300000190734863,
+          text: "wait",
+          start: 4.21999979019165,
+          words: [
+            {
+              end: 4.300000190734863,
+              text: "wait",
+              start: 4.21999979019165,
+            },
+          ],
+        },
       ],
       media: [],
       elements: [],

@@ -10,6 +10,9 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write --list-different .",
     "lint": "next lint",
+    "remotion:create": " remotion lambda sites create src/remotion/index.ts --site-name=my-video",
+    "remotion:render": "remotion lambda render https://remotionlambda-useast1-3scagw6s2q.s3.us-east-1.amazonaws.com/sites/my-video/index.html VideoComposition",
+    "remotion:studio": "remotion studio",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
@@ -35,6 +38,7 @@
     "ai": "^5.0.29",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.1",
     "drizzle-orm": "^0.32.1",
     "geist": "^1.3.1",
     "lucide-react": "^0.428.0",

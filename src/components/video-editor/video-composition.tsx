@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Composition, AbsoluteFill } from "remotion";
+import { Composition, AbsoluteFill, Audio } from "remotion";
 import type { Video as VideoType } from "@/types/video";
 import { useSegmentTiming } from "./hooks/use-segment-timing";
 import { VideoSegmentRenderer } from "./video-segment-renderer";
@@ -26,6 +26,11 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
         fps={fps}
         segments={video?.segments}
         video={video}
+      />
+      <Audio
+        src="https://assets.cursorshorts.com/cursorshorts/assets/backgroundMusic/temporex.mp3"
+        volume={0.08}
+        loop
       />
 
       {/* Watermark */}

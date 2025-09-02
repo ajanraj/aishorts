@@ -43,11 +43,11 @@ const CreateVideoPage = () => {
 
   const videoTypes = [
     { id: "faceless", label: "Faceless Video", icon: Eye, active: true },
-    { id: "ugc", label: "UGC Video", icon: User },
+    // { id: "ugc", label: "UGC Video", icon: User },
     // { id: "gameplay", label: "Gameplay Video", icon: GamepadIcon },
     // { id: "ugc-ads", label: "UGC Ads", icon: Target },
     // { id: "italian", label: "Italian Brainrot", icon: Crown },
-    { id: "pov", label: "POV Video", icon: User },
+    // { id: "pov", label: "POV Video", icon: User },
   ];
 
   const generationPresets = imageStyles.map((style) => ({
@@ -261,7 +261,7 @@ const CreateVideoPage = () => {
             />
 
             {/* Choose media type */}
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <label className="text-sm font-medium">Choose media type</label>
               <div className="text-sm text-muted-foreground">
                 Select what type of media will be used to illustrate your video
@@ -297,7 +297,7 @@ const CreateVideoPage = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </div> */}
 
             {/* Choose generation preset */}
             <div className="space-y-4">

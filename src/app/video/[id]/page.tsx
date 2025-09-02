@@ -26,6 +26,7 @@ import { ProjectAPI } from "@/lib/project-api";
 import { AIVideo, VideoConfig } from "./aivideo";
 import { Composition, registerRoot } from "remotion";
 import { Player } from "@remotion/player";
+import { VideoPreviewModal } from "@/components/ui/video-preview-modal";
 
 // registerRoot(() => <Composition {...VideoConfig} />);
 
@@ -172,6 +173,11 @@ export default function VideoEditorPage() {
   const videoId = params.id as string;
   const { data: project, isLoading, error, refetch } = useProject(videoId);
   const [videoData, setVideoData] = useState<VideoGenerationData | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [exportedVideo, setExportedVideo] = useState<{
+    url: string;
+    filename: string;
+  } | null>(null);
 
   const handleSegmentInsert = async (
     insertAfterIndex: number,
@@ -250,12 +256,11 @@ export default function VideoEditorPage() {
     if (!videoData) return;
 
     try {
-      const response = await fetch("/api/export-video-with-audio", {
+      const response = await fetch("/api/export-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           videoData: videoData.video,
-          backgroundMusicUrl: "/demo/temporex.mp3",
           quality,
         }),
       });
@@ -267,16 +272,12 @@ export default function VideoEditorPage() {
 
       const result = await response.json();
 
-      // Trigger download
-      const link = document.createElement("a");
-      link.href = result.downloadUrl;
-      link.download = result.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Show success message
-      alert("Video exported successfully!");
+      // Show video preview modal instead of immediate download
+      setExportedVideo({
+        url: result.downloadUrl,
+        filename: result.filename,
+      });
+      setShowVideoModal(true);
     } catch (error) {
       console.error("Export failed:", error);
       alert(
@@ -419,6 +420,19 @@ export default function VideoEditorPage() {
           spaceKeyToPlayOrPause={false}
         /> */}
       </div>
+
+      {/* Video Preview Modal */}
+      {exportedVideo && (
+        <VideoPreviewModal
+          isOpen={showVideoModal}
+          onClose={() => {
+            setShowVideoModal(false);
+            setExportedVideo(null);
+          }}
+          videoUrl={exportedVideo.url}
+          filename={exportedVideo.filename}
+        />
+      )}
     </div>
   );
 }

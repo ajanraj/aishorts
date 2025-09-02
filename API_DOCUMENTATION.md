@@ -298,7 +298,7 @@ All API responses follow a consistent JSON format:
 ### Video Export
 
 #### `POST /api/export-video`
-**Purpose**: Export video using Remotion (without audio).
+**Purpose**: Export video using Remotion Lambda with audio processing.
 
 **Authentication**: Not required
 
@@ -321,51 +321,17 @@ All API responses follow a consistent JSON format:
 ```
 
 **Quality Settings**:
-- `low`: CRF 28, 0.5x scale
-- `medium`: CRF 23, 0.75x scale
-- `high`: CRF 18, 1x scale
+- `low`: CRF 28, 10 frames per Lambda
+- `medium`: CRF 23, 20 frames per Lambda
+- `high`: CRF 18, 30 frames per Lambda
 
 **Notes**:
-- Returns `503` if Remotion dependencies are missing
-- Exports are stored in `public/exports/`
-- Videos are muted (audio handled separately)
+- Returns `503` if Remotion Lambda functions are not deployed
+- Uses Remotion Lambda for scalable video rendering
+- Audio processing handled within video rendering pipeline
 
 ---
 
-#### `POST /api/export-video-with-audio`
-**Purpose**: Export video with combined audio tracks using FFmpeg.
-
-**Authentication**: Not required
-
-**Request Body**:
-```json
-{
-  "videoData": {...}, // Video project data
-  "audioTracks": [...], // Audio track data
-  "backgroundMusicUrl": "string", // Optional: Background music URL
-  "quality": "low|medium|high" // Optional, default: "medium"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "downloadUrl": "/exports/video_with_audio_id_timestamp.mp4",
-  "filename": "video_with_audio_id_timestamp.mp4",
-  "message": "Video with audio exported successfully"
-}
-```
-
-**Audio Processing**:
-- Combines voice segments with background music
-- Applies ducking when voice is present
-- Supports multiple audio formats
-- Cleans up temporary files automatically
-
-**Dependencies**: Requires FFmpeg installed on server
-
----
 
 ### Project Management
 

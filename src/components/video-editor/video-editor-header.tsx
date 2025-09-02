@@ -24,6 +24,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Video } from "@/types/video";
+import { VideoPreviewModal } from "@/components/ui/video-preview-modal";
 
 interface VideoEditorHeaderProps {
   currentTime?: number;
@@ -41,6 +42,11 @@ export function VideoEditorHeader({
   const router = useRouter();
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState("");
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [exportedVideo, setExportedVideo] = useState<{
+    url: string;
+    filename: string;
+  } | null>(null);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -76,12 +82,11 @@ export function VideoEditorHeader({
   const exportVideo = async (quality: string) => {
     setExportProgress("Rendering video...");
 
-    const response = await fetch("/api/export-video-with-audio", {
+    const response = await fetch("/api/export-video", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         videoData: video,
-        backgroundMusicUrl: "/demo/temporex.mp3",
         quality,
       }),
     });
@@ -93,22 +98,19 @@ export function VideoEditorHeader({
 
     const result = await response.json();
 
-    setExportProgress("Download ready!");
+    setExportProgress("Video ready!");
 
-    // Trigger download
-    const link = document.createElement("a");
-    link.href = result.downloadUrl;
-    link.download = result.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Show success message
-    alert("Video exported successfully!");
+    // Show video preview modal instead of immediate download
+    setExportedVideo({
+      url: result.downloadUrl,
+      filename: result.filename,
+    });
+    setShowVideoModal(true);
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-white px-4">
+    <>
+      <header className="flex h-14 items-center justify-between border-b bg-white px-4">
       <div className="flex items-center gap-4">
         <Button
           variant="link"
@@ -228,5 +230,19 @@ export function VideoEditorHeader({
         </DropdownMenu>
       </div>
     </header>
+
+      {/* Video Preview Modal */}
+      {exportedVideo && (
+        <VideoPreviewModal
+          isOpen={showVideoModal}
+          onClose={() => {
+            setShowVideoModal(false);
+            setExportedVideo(null);
+          }}
+          videoUrl={exportedVideo.url}
+          filename={exportedVideo.filename}
+        />
+      )}
+    </>
   );
 }
