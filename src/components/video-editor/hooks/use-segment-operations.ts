@@ -36,10 +36,7 @@ export function useSegmentOperations({
   onSegmentUpdate,
   onSegmentInsert,
 }: UseSegmentOperationsProps) {
-  const [editingState, setEditingState] = useState<EditingState | null>(null);
-  const [newFrameState, setNewFrameState] = useState<NewFrameState | null>(
-    null,
-  );
+  // Legacy dialog states removed - dialogs no longer used
   const [isRegenerating, setIsRegenerating] = useState<number | null>(null);
   
   // Sidebar state management
@@ -50,53 +47,20 @@ export function useSegmentOperations({
   
   const { generateImage } = useImageGeneration();
 
-  // Debug: Track editingState changes
-  useEffect(() => {
-    console.log("useSegmentOperations: editingState changed to:", editingState);
-  }, [editingState]);
-
-  const handleEdit = (index: number, segment: VideoSegment) => {
-    console.log(
-      "useSegmentOperations: handleEdit called with index:",
-      index,
-      "segment:",
-      segment.text.substring(0, 50) + "...",
-    );
-    console.log(
-      "useSegmentOperations: Current editingState before update:",
-      editingState,
-    );
-
-    const newEditingState = {
-      index,
-      mode: "image" as EditMode,
-      imagePrompt: segment.imagePrompt,
-      imageModel: "flux-schnell",
-      script: segment.text,
-      voice: "echo",
-    };
-
-    console.log(
-      "useSegmentOperations: Setting new editingState:",
-      newEditingState,
-    );
-    setEditingState(newEditingState);
-  };
+  // Legacy dialog functions removed
 
   // Sidebar handlers
   const handleEditSegmentSidebar = (index: number, segment: VideoSegment) => {
     setSidebarMode("edit");
     setSidebarSegment(segment);
     setSidebarSegmentIndex(index);
-    // Also update the old editingState for compatibility
-    handleEdit(index, segment);
+    // Don't call handleEdit - that triggers dialogs
   };
 
   const handleCreateNewFrameSidebar = (insertAfterIndex: number) => {
     setSidebarMode("new");
     setSidebarInsertAfterIndex(insertAfterIndex);
-    // Also update the old newFrameState for compatibility
-    handleCreateNewFrame(insertAfterIndex);
+    // Don't call handleCreateNewFrame - that triggers dialogs
   };
 
   const closeSidebar = useCallback(() => {
@@ -104,9 +68,7 @@ export function useSegmentOperations({
     setSidebarSegment(null);
     setSidebarSegmentIndex(-1);
     setSidebarInsertAfterIndex(-1);
-    // Also clear old states for compatibility
-    setEditingState(null);
-    setNewFrameState(null);
+    // Don't clear old dialog states - they're unused now
   }, []);
 
   const handleRegenerateImage = useCallback(async (
@@ -321,16 +283,7 @@ export function useSegmentOperations({
     }
   };
 
-  // Handle new frame creation
-  const handleCreateNewFrame = (insertAfterIndex: number) => {
-    setNewFrameState({
-      insertAfterIndex,
-      script: "",
-      voice: "echo",
-      imageModel: "flux-schnell",
-      isGenerating: false,
-    });
-  };
+  // Legacy dialog functions removed
 
   // Count words in script
   const countWords = (text: string): number => {
@@ -343,7 +296,7 @@ export function useSegmentOperations({
     voice: string,
     imageModel: string,
   ) => {
-    if (!newFrameState || !onSegmentInsert) return;
+    if (!onSegmentInsert || sidebarInsertAfterIndex === -1) return;
 
     // Validate script length (max 50 words)
     const wordCount = countWords(script);
@@ -357,7 +310,7 @@ export function useSegmentOperations({
       return;
     }
 
-    setNewFrameState((prev) => (prev ? { ...prev, isGenerating: true } : null));
+    // No need to set generation state - handled by sidebar
 
     try {
       // Step 1: Generate image prompt
@@ -382,7 +335,7 @@ export function useSegmentOperations({
         body: JSON.stringify({
           text: script,
           voice: voice,
-          index: newFrameState.insertAfterIndex + 1,
+          index: sidebarInsertAfterIndex + 1,
         }),
       });
 
@@ -414,50 +367,32 @@ export function useSegmentOperations({
         duration: actualDuration,
         withBlur: false,
         backgroundMinimized: false,
-        order: newFrameState.insertAfterIndex + 1,
+        order: sidebarInsertAfterIndex + 1,
         media: [],
         wordTimings: [],
         elements: [],
       };
 
       // Step 5: Insert new segment
-      onSegmentInsert(newFrameState.insertAfterIndex, newSegment);
+      onSegmentInsert(sidebarInsertAfterIndex, newSegment);
 
-      // Close modal
-      setNewFrameState(null);
+      // Close sidebar after successful creation
+      closeSidebar();
     } catch (error) {
       console.error("Error creating new frame:", error);
       alert("Error creating new frame: " + (error as Error).message);
-    } finally {
-      setNewFrameState((prev) =>
-        prev ? { ...prev, isGenerating: false } : null,
-      );
     }
-  }, [newFrameState, onSegmentInsert, generateImage]);
+    // No finally block needed - generation state handled by sidebar
+  }, [sidebarInsertAfterIndex, onSegmentInsert, generateImage, closeSidebar]);
 
-  const closeEditDialog = () => {
-    console.log(
-      "useSegmentOperations: closeEditDialog called - clearing editingState",
-    );
-    setEditingState(null);
-  };
-
-  const closeNewFrameDialog = () => {
-    setNewFrameState(null);
-  };
+  // Legacy dialog close functions removed
 
   return {
-    // Legacy dialog state (for backward compatibility)
-    editingState,
-    newFrameState,
+    // Regeneration state (used by sidebar)
     isRegenerating,
-    handleEdit,
     handleRegenerateImage,
     handleRegenerateAudio,
-    handleCreateNewFrame,
     handleGenerateNewFrame,
-    closeEditDialog,
-    closeNewFrameDialog,
     
     // Sidebar state and handlers
     sidebarMode,

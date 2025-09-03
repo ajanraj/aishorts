@@ -2,8 +2,6 @@ import { Settings, MoreHorizontal } from "lucide-react";
 import type { VideoSegment } from "@/types/video";
 import { Button } from "@/components/ui/button";
 import { FramesList } from "./frames";
-import { EditSegmentDialog, NewFrameDialog } from "./dialogs";
-import { VideoEditorSidebar } from "./sidebar";
 import { useSegmentOperations } from "./hooks";
 import { useEffect, useRef } from "react";
 
@@ -60,16 +58,10 @@ export function VideoFramesPanel({
   onSidebarStateChange,
 }: VideoFramesPanelProps) {
   const {
-    editingState,
-    newFrameState,
     isRegenerating,
-    handleEdit,
     handleRegenerateImage,
     handleRegenerateAudio,
-    handleCreateNewFrame,
     handleGenerateNewFrame,
-    closeEditDialog,
-    closeNewFrameDialog,
     // Sidebar state and handlers
     sidebarMode,
     sidebarSegment,
@@ -99,7 +91,7 @@ export function VideoFramesPanel({
         segmentIndex: sidebarSegmentIndex,
         insertAfterIndex: sidebarInsertAfterIndex,
         isRegenerating: isRegenerating !== null,
-        isGenerating: newFrameState?.isGenerating ?? false,
+        isGenerating: false, // No longer tracking dialog generation state
         onRegenerateImage: handleRegenerateImage,
         onRegenerateAudio: handleRegenerateAudio,
         onGenerate: handleGenerateNewFrame,
@@ -113,7 +105,7 @@ export function VideoFramesPanel({
         segmentIndex: sidebarSegmentIndex,
         insertAfterIndex: sidebarInsertAfterIndex,
         isRegenerating: isRegenerating !== null,
-        isGenerating: newFrameState?.isGenerating ?? false,
+        isGenerating: false, // No longer tracking dialog generation state
       });
       
       // Only call the callback if the state actually changed
@@ -128,7 +120,6 @@ export function VideoFramesPanel({
     sidebarSegmentIndex,
     sidebarInsertAfterIndex,
     isRegenerating,
-    newFrameState?.isGenerating,
     onSidebarStateChange,
     handleRegenerateImage,
     handleRegenerateAudio,
@@ -176,30 +167,6 @@ export function VideoFramesPanel({
         />
       </div>
 
-      {/* Edit Segment Dialog */}
-      <EditSegmentDialog
-        isOpen={editingState !== null}
-        onClose={closeEditDialog}
-        segment={
-          editingState && segments[editingState.index]
-            ? segments[editingState.index]
-            : null
-        }
-        segmentIndex={editingState?.index ?? -1}
-        onRegenerateImage={handleRegenerateImage}
-        onRegenerateAudio={handleRegenerateAudio}
-        onSegmentUpdate={onSegmentUpdate}
-        isRegenerating={isRegenerating !== null}
-      />
-
-      {/* New Frame Dialog */}
-      <NewFrameDialog
-        isOpen={Boolean(newFrameState)}
-        onClose={closeNewFrameDialog}
-        insertAfterIndex={newFrameState?.insertAfterIndex ?? -1}
-        onGenerate={handleGenerateNewFrame}
-        isGenerating={newFrameState?.isGenerating ?? false}
-      />
     </div>
   );
 }

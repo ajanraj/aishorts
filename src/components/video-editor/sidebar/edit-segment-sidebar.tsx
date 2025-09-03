@@ -51,7 +51,10 @@ export function EditSegmentSidebar({
   // Initialize form values when segment changes
   useEffect(() => {
     if (segment) {
-      console.log("EditSegmentSidebar: segment updated, imageUrl:", segment.imageUrl);
+      console.log(
+        "EditSegmentSidebar: segment updated, imageUrl:",
+        segment.imageUrl,
+      );
       setImagePrompt(segment.imagePrompt);
       setScript(segment.text);
       setImageModel("flux-schnell");
@@ -101,7 +104,7 @@ export function EditSegmentSidebar({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-full space-y-4">
       {/* Tab Navigation */}
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -133,7 +136,7 @@ export function EditSegmentSidebar({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>

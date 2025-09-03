@@ -179,7 +179,7 @@ export default function VideoEditorPage() {
     url: string;
     filename: string;
   } | null>(null);
-  
+
   // Sidebar state
   const [sidebarState, setSidebarState] = useState<{
     mode: any;
@@ -188,9 +188,21 @@ export default function VideoEditorPage() {
     insertAfterIndex: number;
     isRegenerating: boolean;
     isGenerating: boolean;
-    onRegenerateImage: (index: number, prompt: string, model: string) => Promise<void>;
-    onRegenerateAudio: (index: number, script: string, voice: string) => Promise<void>;
-    onGenerate: (script: string, voice: string, imageModel: string) => Promise<void>;
+    onRegenerateImage: (
+      index: number,
+      prompt: string,
+      model: string,
+    ) => Promise<void>;
+    onRegenerateAudio: (
+      index: number,
+      script: string,
+      voice: string,
+    ) => Promise<void>;
+    onGenerate: (
+      script: string,
+      voice: string,
+      imageModel: string,
+    ) => Promise<void>;
     onClose: () => void;
   } | null>(null);
 
@@ -410,10 +422,10 @@ export default function VideoEditorPage() {
       </div>
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex flex-1 h-full">
+      <div className="flex h-full flex-1">
         {/* Left Sidebar */}
         {sidebarState && (
-          <div className="w-80 border-r border-gray-200 bg-white">
+          <div className="h-full w-80 border-r border-gray-200 bg-white">
             <VideoEditorSidebar
               mode={sidebarState.mode}
               onClose={sidebarState.onClose}
@@ -444,7 +456,7 @@ export default function VideoEditorPage() {
         )}
 
         {/* Main Video Player Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           <VideoPlayerPanel
             projectId={project.id}
             onSegmentInsert={handleSegmentInsert}
