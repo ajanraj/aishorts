@@ -2,16 +2,22 @@
  * React Query hooks for project management
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ProjectClient } from '@/lib/project-client';
-import { Project, ProjectWithDetails, CreateSegmentData, UpdateSegmentData } from '@/types/project';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ProjectClient } from "@/lib/project-client";
+import {
+  Project,
+  ProjectWithDetails,
+  CreateSegmentData,
+  UpdateSegmentData,
+} from "@/types/project";
 
 // Query keys
 export const projectQueryKeys = {
-  all: ['projects'] as const,
-  lists: () => [...projectQueryKeys.all, 'list'] as const,
-  list: (filters: string) => [...projectQueryKeys.lists(), { filters }] as const,
-  details: () => [...projectQueryKeys.all, 'detail'] as const,
+  all: ["projects"] as const,
+  lists: () => [...projectQueryKeys.all, "list"] as const,
+  list: (filters: string) =>
+    [...projectQueryKeys.lists(), { filters }] as const,
+  details: () => [...projectQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...projectQueryKeys.details(), id] as const,
 };
 
@@ -32,8 +38,8 @@ export function useProjects() {
  */
 export function useProject(projectId: string | null) {
   return useQuery<ProjectWithDetails | null, Error>({
-    queryKey: projectQueryKeys.detail(projectId || ''),
-    queryFn: () => projectId ? ProjectClient.getProject(projectId) : null,
+    queryKey: projectQueryKeys.detail(projectId || ""),
+    queryFn: () => (projectId ? ProjectClient.getProject(projectId) : null),
     enabled: !!projectId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -55,10 +61,13 @@ export function useCreateProject() {
         if (!old) return [newProject];
         return [newProject, ...old];
       });
-      
+
       // Set the new project in detail cache
-      queryClient.setQueryData(projectQueryKeys.detail(newProject.id), newProject);
-      
+      queryClient.setQueryData(
+        projectQueryKeys.detail(newProject.id),
+        newProject,
+      );
+
       // Set as current project
       ProjectClient.setCurrentProject(newProject.id);
     },
@@ -72,31 +81,36 @@ export function useUpdateProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ projectId, data }: { projectId: string; data: Partial<Project> }) =>
-      ProjectClient.updateProject(projectId, data),
+    mutationFn: ({
+      projectId,
+      data,
+    }: {
+      projectId: string;
+      data: Partial<Project>;
+    }) => ProjectClient.updateProject(projectId, data),
     onSuccess: (_, { projectId, data }) => {
       // Update the project in detail cache
       queryClient.setQueryData<ProjectWithDetails | null>(
         projectQueryKeys.detail(projectId),
         (old) => {
           if (!old) return null;
-          return { 
-            ...old, 
-            ...data, 
+          return {
+            ...old,
+            ...data,
             updatedAt: new Date().toISOString(),
             segments: old.segments || [],
-            files: old.files || []
+            files: old.files || [],
           };
-        }
+        },
       );
-      
+
       // Update the project in the projects list
       queryClient.setQueryData<Project[]>(projectQueryKeys.lists(), (old) => {
         if (!old) return old;
         return old.map((project) =>
           project.id === projectId
             ? { ...project, ...data, updatedAt: new Date().toISOString() }
-            : project
+            : project,
         );
       });
     },
@@ -117,13 +131,15 @@ export function useDeleteProject() {
         if (!old) return old;
         return old.filter((project) => project.id !== projectId);
       });
-      
+
       // Remove from detail cache
-      queryClient.removeQueries({ queryKey: projectQueryKeys.detail(projectId) });
-      
+      queryClient.removeQueries({
+        queryKey: projectQueryKeys.detail(projectId),
+      });
+
       // Clear current project if it was the deleted one
       if (ProjectClient.getCurrentProjectId() === projectId) {
-        ProjectClient.setCurrentProject('');
+        ProjectClient.setCurrentProject("");
       }
     },
   });
@@ -141,11 +157,18 @@ export function useUpdateSegments() {
       segments,
     }: {
       projectId: string;
-      segments: Array<{ text: string; imagePrompt: string; duration?: number; order: number }>;
+      segments: Array<{
+        text: string;
+        imagePrompt: string;
+        duration?: number;
+        order: number;
+      }>;
     }) => ProjectClient.updateSegments(projectId, segments),
     onSuccess: (_, { projectId }) => {
       // Invalidate the project to refetch with updated segments
-      queryClient.invalidateQueries({ queryKey: projectQueryKeys.detail(projectId) });
+      queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.detail(projectId),
+      });
     },
   });
 }
@@ -157,17 +180,25 @@ export function useCreateSegment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ projectId, data }: { projectId: string; data: CreateSegmentData }) =>
-      ProjectClient.createSegment(projectId, data),
+    mutationFn: ({
+      projectId,
+      data,
+    }: {
+      projectId: string;
+      data: CreateSegmentData;
+    }) => ProjectClient.createSegment(projectId, data),
     onSuccess: (newSegment, { projectId }) => {
       // Update the project cache to include the new segment
       queryClient.setQueryData<ProjectWithDetails | null>(
         projectQueryKeys.detail(projectId),
         (old) => {
           if (!old) return null;
-          const segments = [...(old.segments || []), { ...newSegment, files: [] }];
+          const segments = [
+            ...(old.segments || []),
+            { ...newSegment, files: [] },
+          ];
           return { ...old, segments };
-        }
+        },
       );
     },
   });
@@ -196,10 +227,23 @@ export function useUpdateSegment() {
         (old) => {
           if (!old) return null;
           const segments = old.segments?.map((segment) =>
-            segment.id === segmentId ? { ...segment, ...updatedSegment } : segment
+            segment.id === segmentId
+              ? {
+                  ...segment,
+                  ...updatedSegment,
+                  // Ensure updatedAt is always updated to trigger re-renders
+                  updatedAt:
+                    updatedSegment.updatedAt || new Date().toISOString(),
+                }
+              : segment,
           );
-          return { ...old, segments };
-        }
+          return {
+            ...old,
+            segments,
+            // Also update the project's updatedAt to ensure all dependencies are triggered
+            updatedAt: new Date().toISOString(),
+          };
+        },
       );
     },
   });
