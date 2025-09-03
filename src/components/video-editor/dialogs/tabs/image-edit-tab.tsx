@@ -33,7 +33,7 @@ export function ImageEditTab({
   }, [segment.imageUrl]);
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6">
       {/* Left Column - Image Preview */}
       <div className="space-y-4">
         <div>
@@ -73,7 +73,8 @@ export function ImageEditTab({
                 {segment.imagePrompt}
               </div>
               <div>
-                <span className="font-medium">Resolution:</span> 1080×1920 (9:16)
+                <span className="font-medium">Resolution:</span> 1080×1920
+                (9:16)
               </div>
             </div>
           )}

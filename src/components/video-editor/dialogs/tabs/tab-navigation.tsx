@@ -12,7 +12,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
     <div className="flex space-x-1 rounded-lg bg-gray-100 p-1">
       <button
         onClick={() => onTabChange("image")}
-        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
           activeTab === "image"
             ? "bg-white text-blue-600 shadow-sm"
             : "text-gray-600 hover:text-gray-900"
@@ -23,7 +23,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
       </button>
       <button
         onClick={() => onTabChange("script")}
-        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
           activeTab === "script"
             ? "bg-white text-blue-600 shadow-sm"
             : "text-gray-600 hover:text-gray-900"

@@ -62,11 +62,11 @@ export function VideoEditorSidebar({
       {/* Sidebar Header */}
       <div className="flex items-center justify-between border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold">
-          {mode === "edit" && `Edit Segment #${segmentIndex ?? 0}`}
+          {mode === "edit" && `Edit Segment #${segmentIndex + 1 ?? 1}`}
           {mode === "new" &&
             `Add New Frame${
               insertAfterIndex !== undefined && insertAfterIndex >= 0
-                ? ` After #${insertAfterIndex}`
+                ? ` After #${insertAfterIndex + 1}`
                 : " At Beginning"
             }`}
         </h2>

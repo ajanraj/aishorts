@@ -68,7 +68,7 @@ async function generateImageWithService(
     userId,
     projectId,
     segmentId,
-    index
+    index,
   );
 
   return {
@@ -80,27 +80,78 @@ async function generateImageWithService(
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const body: ImageGenerationRequest = await request.json();
+  const requestStartTime = Date.now();
+  const requestId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-    // Get user session if R2 storage is requested
+  console.log(`[API:GenerateImages] === REQUEST START === (${requestId})`);
+  console.log(
+    `[API:GenerateImages] Request received at ${new Date().toISOString()}`,
+  );
+
+  try {
+    // Step 1: Parse request body
+    console.log(`[API:GenerateImages] ${requestId} - Parsing request body...`);
+    const parseStartTime = Date.now();
+    const body: ImageGenerationRequest = await request.json();
+    const parseDuration = Date.now() - parseStartTime;
+
+    console.log(
+      `[API:GenerateImages] ${requestId} - Request parsed (${parseDuration}ms):`,
+    );
+    console.log(`[API:GenerateImages] ${requestId} - Type: ${body.type}`);
+    console.log(
+      `[API:GenerateImages] ${requestId} - Store in R2: ${body.storeInR2 || false}`,
+    );
+
+    if (body.type === "single") {
+      console.log(
+        `[API:GenerateImages] ${requestId} - Single image request: "${body.prompt?.substring(0, 80)}..."`,
+      );
+    } else if (body.type === "batch") {
+      console.log(
+        `[API:GenerateImages] ${requestId} - Batch request: ${body.prompts?.length || 0} images`,
+      );
+    }
+
+    // Step 2: Authentication (if R2 storage requested)
     let userId: string | undefined;
     if (
       (body.type === "single" && body.storeInR2) ||
       (body.type === "batch" && body.storeInR2)
     ) {
+      console.log(
+        `[API:GenerateImages] ${requestId} - R2 storage requested, checking authentication...`,
+      );
+      const authStartTime = Date.now();
       const session = await auth();
+      const authDuration = Date.now() - authStartTime;
+
       if (!session?.user?.id) {
+        console.warn(
+          `[API:GenerateImages] ${requestId} - Authentication failed after ${authDuration}ms`,
+        );
         return NextResponse.json(
           { success: false, error: "Authentication required for R2 storage" },
           { status: 401 },
         );
       }
       userId = session.user.id;
+      console.log(
+        `[API:GenerateImages] ${requestId} - Authentication successful for user ${userId} (${authDuration}ms)`,
+      );
+    } else {
+      console.log(
+        `[API:GenerateImages] ${requestId} - No R2 storage requested, skipping authentication`,
+      );
     }
 
     if (body.type === "single") {
-      // Single image generation for regeneration
+      // Step 3a: Single image generation
+      console.log(
+        `[API:GenerateImages] ${requestId} - Starting single image generation...`,
+      );
+      const singleStartTime = Date.now();
+
       const result = await generateImageWithService(
         body.prompt,
         body.style,
@@ -114,14 +165,36 @@ export async function POST(request: NextRequest) {
         body.segmentId,
       );
 
+      const singleDuration = Date.now() - singleStartTime;
+      const totalDuration = Date.now() - requestStartTime;
+
+      console.log(
+        `[API:GenerateImages] ${requestId} - Single image generation ${result.success ? "completed" : "failed"} (${singleDuration}ms)`,
+      );
+      console.log(
+        `[API:GenerateImages] === REQUEST COMPLETED === (${requestId})`,
+      );
+      console.log(
+        `[API:GenerateImages] ${requestId} - Total request duration: ${totalDuration}ms`,
+      );
+
       return NextResponse.json(result);
     } else if (body.type === "batch") {
-      // Batch image generation for create-video flow
+      // Step 3b: Batch image generation
+      console.log(
+        `[API:GenerateImages] ${requestId} - Starting batch image generation for ${body.prompts.length} images...`,
+      );
+      const batchStartTime = Date.now();
       const results: ImageResult[] = [];
 
-      // Process images in parallel (no more artificial delays)
+      // Process images sequentially with detailed logging
       for (let i = 0; i < body.prompts.length; i++) {
         const promptData = body.prompts[i];
+        console.log(
+          `[API:GenerateImages] ${requestId} - Processing image ${i + 1}/${body.prompts.length}: "${promptData.prompt.substring(0, 60)}..."`,
+        );
+
+        const imageStartTime = Date.now();
         try {
           const result = await generateImageWithService(
             promptData.prompt,
@@ -137,13 +210,21 @@ export async function POST(request: NextRequest) {
             i, // Pass the index
           );
 
+          const imageDuration = Date.now() - imageStartTime;
+          console.log(
+            `[API:GenerateImages] ${requestId} - Image ${i + 1} ${result.success ? "completed" : "failed"} (${imageDuration}ms)`,
+          );
           results.push(result);
         } catch (error) {
+          const imageDuration = Date.now() - imageStartTime;
           console.error(
-            "Error generating image for prompt:",
-            promptData.prompt,
+            `[API:GenerateImages] ${requestId} - Image ${i + 1} failed after ${imageDuration}ms:`,
             error,
           );
+          console.error(
+            `[API:GenerateImages] ${requestId} - Failed prompt: "${promptData.prompt}"`,
+          );
+
           results.push({
             success: false,
             error:
@@ -155,13 +236,33 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      const batchDuration = Date.now() - batchStartTime;
+      const totalDuration = Date.now() - requestStartTime;
+      const successCount = results.filter((r) => r.success).length;
+
+      console.log(
+        `[API:GenerateImages] ${requestId} - Batch generation completed (${batchDuration}ms)`,
+      );
+      console.log(
+        `[API:GenerateImages] ${requestId} - Results: ${successCount}/${body.prompts.length} successful`,
+      );
+      console.log(
+        `[API:GenerateImages] === REQUEST COMPLETED === (${requestId})`,
+      );
+      console.log(
+        `[API:GenerateImages] ${requestId} - Total request duration: ${totalDuration}ms`,
+      );
+
       return NextResponse.json({
         success: true,
         results,
-        totalGenerated: results.filter((r) => r.success).length,
+        totalGenerated: successCount,
         totalRequested: body.prompts.length,
       });
     } else {
+      console.warn(
+        `[API:GenerateImages] ${requestId} - Invalid request type: ${body.type}`,
+      );
       return NextResponse.json(
         {
           success: false,
@@ -171,7 +272,18 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Error in image generation API:", error);
+    const totalDuration = Date.now() - requestStartTime;
+    console.error(`[API:GenerateImages] === REQUEST FAILED === (${requestId})`);
+    console.error(
+      `[API:GenerateImages] ${requestId} - Request failed after ${totalDuration}ms:`,
+      error,
+    );
+    console.error(`[API:GenerateImages] ${requestId} - Error details:`, {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
     return NextResponse.json(
       {
         success: false,

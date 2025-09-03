@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { imageStyles, getDefaultImageStyle } from "@/lib/image-config";
+import { imageModels, getDefaultImageModel } from "@/lib/image-models";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,9 @@ const CreateVideoPage = () => {
   const [selectedMediaType, setSelectedMediaType] = useState("AI Images");
   const [selectedStyleId, setSelectedStyleId] = useState(
     getDefaultImageStyle().id,
+  );
+  const [selectedImageModel, setSelectedImageModel] = useState(
+    getDefaultImageModel().id,
   );
   const [selectedVoice, setSelectedVoice] = useState("echo");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -77,6 +81,7 @@ const CreateVideoPage = () => {
           videoType: selectedVideoType,
           mediaType: selectedMediaType,
           styleId: selectedStyleId,
+          imageModel: selectedImageModel,
           voice: selectedVoice,
         }),
       });
@@ -320,6 +325,45 @@ const CreateVideoPage = () => {
                       {preset.label}
                     </div>
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Choose Image Model */}
+            <div className="space-y-4">
+              <label className="text-sm font-medium">
+                Choose image model
+              </label>
+              <div className="text-sm text-muted-foreground">
+                Select the AI model that will generate your images
+              </div>
+              <div className="space-y-3">
+                {imageModels.map((model) => (
+                  <label
+                    key={model.id}
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all hover:bg-gray-50 ${
+                      selectedImageModel === model.id
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="imageModel"
+                      value={model.id}
+                      checked={selectedImageModel === model.id}
+                      onChange={(e) => setSelectedImageModel(e.target.value)}
+                      className="mt-1 h-4 w-4 text-blue-600"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">
+                        {model.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {model.description}
+                      </div>
+                    </div>
+                  </label>
                 ))}
               </div>
             </div>

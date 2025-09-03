@@ -21,6 +21,11 @@ export const imageModels: ImageModel[] = [
     description: "Highest quality, slower",
   },
   {
+    id: "nano-banana",
+    name: "Nano Banana",
+    description: "Compact and efficient model for creative images",
+  },
+  {
     id: "gpt-image-1",
     name: "GPT Image 1",
     description: "OpenAI's DALL-E 3, high quality",
