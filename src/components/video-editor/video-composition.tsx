@@ -34,7 +34,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
       />
 
       {/* Watermark */}
-      <VideoWatermark show={!!video?.watermark} />
+      <VideoWatermark show={true} />
     </AbsoluteFill>
   );
 };

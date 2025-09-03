@@ -35,7 +35,7 @@ export function VideoPreviewModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-lg bg-white shadow-xl">
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-lg bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-lg font-semibold">Video Preview</h2>
@@ -51,28 +51,27 @@ export function VideoPreviewModal({
 
         {/* Video Content */}
         <div className="p-6">
-          <div className="relative aspect-[9/16] max-h-[60vh] overflow-hidden rounded-lg bg-black">
+          <div className="relative overflow-hidden rounded-lg bg-black">
             <video
               ref={videoRef}
               src={videoUrl}
               controls
-              className="h-full w-full object-contain"
+              className="h-full max-h-[50vh] w-full object-contain"
               preload="metadata"
             >
               Your browser does not support the video tag.
             </video>
           </div>
-
-          {/* Download Button */}
-          <div className="mt-6 flex justify-center">
-            <Button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-6 py-3"
-              size="lg"
-            >
-              <Download className="h-5 w-5" />
-              Download Video
-            </Button>
+          {/* Download Instructions */}
+          <div className="mt-6 flex flex-col">
+            <h3 className="text-lg font-semibold">Download Instructions</h3>
+            <ol>
+              <li className="mb-2">
+                1. Click on the menu icon in the bottom right corner of the
+                video player
+              </li>
+              <li className="mb-2">2. Click on "Download" </li>
+            </ol>
           </div>
         </div>
       </div>

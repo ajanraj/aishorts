@@ -9,12 +9,15 @@ export const VideoWatermark: React.FC<VideoWatermarkProps> = ({ show }) => {
   if (!show) return null;
 
   return (
-    <AbsoluteFill className="flex w-full items-start justify-end p-8">
-      <div className="align-center flex gap-4 rounded-full bg-white/50 px-4 text-5xl text-white backdrop-blur-sm">
-        <span style={{ color: "#fbbf24" }}>
-          <img src="/logo.svg" alt="CursorShorts.com" className="h-10" />
-        </span>
-        <span>cursorhorts.com</span>
+    <AbsoluteFill className="flex w-full items-end justify-start p-8">
+      <div className="align-center flex justify-center gap-4 rounded-full bg-white/10 px-4 py-2 text-5xl text-white backdrop-blur-xl">
+        <img
+          src="https://assets.cursorshorts.com/cursorshorts/assets/images/logo.svg"
+          alt="CursorShorts.com"
+          className="mt-2 h-[2.5rem]"
+        />
+
+        <span>cursorshorts.com</span>
       </div>
     </AbsoluteFill>
   );

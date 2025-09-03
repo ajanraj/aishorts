@@ -3,8 +3,9 @@ import type { VideoSegment } from "@/types/video";
 import { Button } from "@/components/ui/button";
 import { FramesList } from "./frames";
 import { EditSegmentDialog, NewFrameDialog } from "./dialogs";
+import { VideoEditorSidebar } from "./sidebar";
 import { useSegmentOperations } from "./hooks";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface VideoFramesPanelProps {
   segments: VideoSegment[];
@@ -17,6 +18,32 @@ interface VideoFramesPanelProps {
   onSegmentInsert?: (index: number, newSegment: VideoSegment) => void;
   orientation?: "vertical" | "horizontal";
   showHeader?: boolean;
+  // Callback to notify parent about sidebar state
+  onSidebarStateChange?: (state: {
+    mode: any;
+    segment: VideoSegment | null;
+    segmentIndex: number;
+    insertAfterIndex: number;
+    isRegenerating: boolean;
+    isGenerating: boolean;
+    // Handler functions for the sidebar
+    onRegenerateImage: (
+      index: number,
+      prompt: string,
+      model: string,
+    ) => Promise<void>;
+    onRegenerateAudio: (
+      index: number,
+      script: string,
+      voice: string,
+    ) => Promise<void>;
+    onGenerate: (
+      script: string,
+      voice: string,
+      imageModel: string,
+    ) => Promise<void>;
+    onClose: () => void;
+  }) => void;
 }
 
 export function VideoFramesPanel({
@@ -30,6 +57,7 @@ export function VideoFramesPanel({
   onSegmentInsert,
   orientation = "vertical",
   showHeader = true,
+  onSidebarStateChange,
 }: VideoFramesPanelProps) {
   const {
     editingState,
@@ -42,6 +70,14 @@ export function VideoFramesPanel({
     handleGenerateNewFrame,
     closeEditDialog,
     closeNewFrameDialog,
+    // Sidebar state and handlers
+    sidebarMode,
+    sidebarSegment,
+    sidebarSegmentIndex,
+    sidebarInsertAfterIndex,
+    handleEditSegmentSidebar,
+    handleCreateNewFrameSidebar,
+    closeSidebar,
   } = useSegmentOperations({
     segments,
     projectId,
@@ -51,19 +87,54 @@ export function VideoFramesPanel({
 
   const isHorizontal = orientation === "horizontal";
 
-  // useEffect(() => {
-  //   console.log("VideoFramesPanel - editingState:", editingState);
-  //   if (editingState) {
-  //     console.log(
-  //       "VideoFramesPanel - segment for editingState:",
-  //       segments[editingState.index] ? "found" : "not found",
-  //       "index:",
-  //       editingState.index,
-  //       "segments length:",
-  //       segments.length,
-  //     );
-  //   }
-  // }, [editingState, segments]);
+  // Use a ref to track the previous sidebar state to avoid unnecessary updates
+  const previousStateRef = useRef<string | null>(null);
+  
+  // Notify parent about sidebar state changes
+  useEffect(() => {
+    if (onSidebarStateChange) {
+      const currentState = {
+        mode: sidebarMode,
+        segment: sidebarSegment,
+        segmentIndex: sidebarSegmentIndex,
+        insertAfterIndex: sidebarInsertAfterIndex,
+        isRegenerating: isRegenerating !== null,
+        isGenerating: newFrameState?.isGenerating ?? false,
+        onRegenerateImage: handleRegenerateImage,
+        onRegenerateAudio: handleRegenerateAudio,
+        onGenerate: handleGenerateNewFrame,
+        onClose: closeSidebar,
+      };
+      
+      // Create a simple state key for comparison (excluding functions)
+      const stateKey = JSON.stringify({
+        mode: sidebarMode,
+        segmentId: sidebarSegment?._id || sidebarSegment?.id,
+        segmentIndex: sidebarSegmentIndex,
+        insertAfterIndex: sidebarInsertAfterIndex,
+        isRegenerating: isRegenerating !== null,
+        isGenerating: newFrameState?.isGenerating ?? false,
+      });
+      
+      // Only call the callback if the state actually changed
+      if (stateKey !== previousStateRef.current) {
+        previousStateRef.current = stateKey;
+        onSidebarStateChange(currentState);
+      }
+    }
+  }, [
+    sidebarMode,
+    sidebarSegment,
+    sidebarSegmentIndex,
+    sidebarInsertAfterIndex,
+    isRegenerating,
+    newFrameState?.isGenerating,
+    onSidebarStateChange,
+    handleRegenerateImage,
+    handleRegenerateAudio,
+    handleGenerateNewFrame,
+    closeSidebar,
+  ]);
 
   return (
     <div className={isHorizontal ? "w-full" : "w-80 border-r bg-white"}>
@@ -99,8 +170,8 @@ export function VideoFramesPanel({
           selectedFrameIndex={selectedFrameIndex}
           onFrameSelect={onFrameSelect}
           orientation={orientation}
-          onEditFrame={handleEdit}
-          onCreateNewFrame={handleCreateNewFrame}
+          onEditFrame={handleEditSegmentSidebar}
+          onCreateNewFrame={handleCreateNewFrameSidebar}
           isRegenerating={isRegenerating}
         />
       </div>

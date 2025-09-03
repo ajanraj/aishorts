@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Loading } from "@/components/ui/loading";
 import { VideoPlayerPanel } from "@/components/video-editor/video-player-panel";
 import { VideoEditorHeader } from "@/components/video-editor/video-editor-header";
+import { VideoEditorSidebar } from "@/components/video-editor/sidebar";
 import type { VideoGenerationData, VideoSegment, Layer } from "@/types/video";
 import type { ProjectWithDetails } from "@/types/project";
 import { useProject } from "@/hooks/use-projects";
@@ -177,6 +178,20 @@ export default function VideoEditorPage() {
   const [exportedVideo, setExportedVideo] = useState<{
     url: string;
     filename: string;
+  } | null>(null);
+  
+  // Sidebar state
+  const [sidebarState, setSidebarState] = useState<{
+    mode: any;
+    segment: VideoSegment | null;
+    segmentIndex: number;
+    insertAfterIndex: number;
+    isRegenerating: boolean;
+    isGenerating: boolean;
+    onRegenerateImage: (index: number, prompt: string, model: string) => Promise<void>;
+    onRegenerateAudio: (index: number, script: string, voice: string) => Promise<void>;
+    onGenerate: (script: string, voice: string, imageModel: string) => Promise<void>;
+    onClose: () => void;
   } | null>(null);
 
   const handleSegmentInsert = async (
@@ -394,31 +409,48 @@ export default function VideoEditorPage() {
         <VideoEditorHeader video={videoData.video} onExport={handleExport} />
       </div>
 
-      {/* Main Video Player - Full Width with Bottom Horizontal Segments */}
-      <div className="h-80 flex-1">
-        <VideoPlayerPanel
-          projectId={project.id}
-          onSegmentInsert={handleSegmentInsert}
-        />
-        {/* <Player
-          className="h-80 w-full"
-          component={VideoConfig.component}
-          durationInFrames={VideoConfig.durationInFrames}
-          compositionWidth={VideoConfig.width || 1080}
-          compositionHeight={VideoConfig.height || 1920}
-          fps={VideoConfig.fps || 30}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
-          autoPlay={false}
-          controls={true}
-          loop={false}
-          allowFullscreen
-          doubleClickToFullscreen
-          showVolumeControls={true}
-          spaceKeyToPlayOrPause={false}
-        /> */}
+      {/* Main Content Area with Sidebar */}
+      <div className="flex flex-1 h-full">
+        {/* Left Sidebar */}
+        {sidebarState && (
+          <div className="w-80 border-r border-gray-200 bg-white">
+            <VideoEditorSidebar
+              mode={sidebarState.mode}
+              onClose={sidebarState.onClose}
+              segment={sidebarState.segment}
+              segmentIndex={sidebarState.segmentIndex}
+              onRegenerateImage={sidebarState.onRegenerateImage}
+              onRegenerateAudio={sidebarState.onRegenerateAudio}
+              onSegmentUpdate={async (index, updatedSegment) => {
+                // Update video data state
+                if (videoData) {
+                  const updatedSegments = [...videoData.video.segments];
+                  updatedSegments[index] = updatedSegment;
+                  setVideoData({
+                    ...videoData,
+                    video: {
+                      ...videoData.video,
+                      segments: updatedSegments,
+                    },
+                  });
+                }
+              }}
+              isRegenerating={sidebarState.isRegenerating}
+              insertAfterIndex={sidebarState.insertAfterIndex}
+              onGenerate={sidebarState.onGenerate}
+              isGenerating={sidebarState.isGenerating}
+            />
+          </div>
+        )}
+
+        {/* Main Video Player Area */}
+        <div className="flex-1 flex flex-col">
+          <VideoPlayerPanel
+            projectId={project.id}
+            onSegmentInsert={handleSegmentInsert}
+            onSidebarStateChange={setSidebarState}
+          />
+        </div>
       </div>
 
       {/* Video Preview Modal */}

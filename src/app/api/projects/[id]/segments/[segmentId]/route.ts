@@ -1,20 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { ProjectService } from '@/lib/project-service';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { ProjectService } from "@/lib/project-service";
+import { z } from "zod";
 
-// WordTiming validation schema
-const WordTimingSchema = z.object({
-  word: z.string(),
+const WordsSchema = z.object({
+  text: z.string(),
   start: z.number().nonnegative(),
   end: z.number().nonnegative(),
+});
+
+// WordTiming validation schema - matches the actual WordTiming interface
+const WordTimingSchema = z.object({
+  text: z.string(),
+  start: z.number().nonnegative(),
+  end: z.number().nonnegative(),
+  words: z.array(WordsSchema),
 });
 
 // Request validation schemas
 const UpdateSegmentSchema = z.object({
   order: z.number().int().nonnegative().optional(),
-  text: z.string().min(1, 'Text is required').optional(),
-  imagePrompt: z.string().min(1, 'Image prompt is required').optional(),
+  text: z.string().min(1, "Text is required").optional(),
+  imagePrompt: z.string().min(1, "Image prompt is required").optional(),
   duration: z.number().positive().optional(),
   audioVolume: z.number().min(0).max(2).optional(),
   playBackRate: z.number().min(0.5).max(2).optional(),
@@ -33,31 +40,31 @@ type UpdateSegmentRequest = z.infer<typeof UpdateSegmentSchema>;
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; segmentId: string } }
+  { params }: { params: { id: string; segmentId: string } },
 ) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
+        { success: false, error: "Authentication required" },
+        { status: 401 },
       );
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = UpdateSegmentSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid request data',
+        {
+          success: false,
+          error: "Invalid request data",
           details: validationResult.error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -66,41 +73,51 @@ export async function PUT(
 
     // Update segment
     const updatedSegment = await ProjectService.updateSegment(
-      segmentId, 
-      session.user.id, 
-      updateData
+      segmentId,
+      session.user.id,
+      updateData,
     );
 
     return NextResponse.json({
       success: true,
       data: updatedSegment,
-      message: 'Segment updated successfully',
+      message: "Segment updated successfully",
     });
   } catch (error) {
-    console.error(`PUT /api/projects/${params.id}/segments/${params.segmentId} error:`, error);
-    
+    console.error(
+      `PUT /api/projects/${params.id}/segments/${params.segmentId} error:`,
+      error,
+    );
+
     if (error instanceof Error) {
-      if (error.message.includes('not found') || error.message.includes('access denied')) {
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("access denied")
+      ) {
         return NextResponse.json(
-          { success: false, error: 'Segment not found' },
-          { status: 404 }
+          { success: false, error: "Segment not found" },
+          { status: 404 },
         );
       }
-      
-      if (error.message.includes('required') || error.message.includes('validation')) {
+
+      if (
+        error.message.includes("required") ||
+        error.message.includes("validation")
+      ) {
         return NextResponse.json(
           { success: false, error: error.message },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update segment' 
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to update segment",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -110,16 +127,16 @@ export async function PUT(
  * Delete a specific segment and its associated files
  */
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string; segmentId: string } }
+  _request: NextRequest,
+  { params }: { params: { id: string; segmentId: string } },
 ) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
+        { success: false, error: "Authentication required" },
+        { status: 401 },
       );
     }
 
@@ -130,26 +147,33 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Segment deleted successfully',
+      message: "Segment deleted successfully",
     });
   } catch (error) {
-    console.error(`DELETE /api/projects/${params.id}/segments/${params.segmentId} error:`, error);
-    
+    console.error(
+      `DELETE /api/projects/${params.id}/segments/${params.segmentId} error:`,
+      error,
+    );
+
     if (error instanceof Error) {
-      if (error.message.includes('not found') || error.message.includes('access denied')) {
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("access denied")
+      ) {
         return NextResponse.json(
-          { success: false, error: 'Segment not found' },
-          { status: 404 }
+          { success: false, error: "Segment not found" },
+          { status: 404 },
         );
       }
     }
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to delete segment' 
+      {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to delete segment",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

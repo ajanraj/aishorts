@@ -72,7 +72,7 @@ export function useVideoEditor({
         })),
     ),
   ]);
-  console.log("thoufic video", video);
+  // console.log("thoufic video", video);
 
   // Update a video segment
   const updateSegment = useCallback(

@@ -22,14 +22,14 @@ const getCurrentWordsData = (
   // Find the current active batch from pre-batched word timings
   let currentBatch: WordTiming | null = null;
 
-  for (const batch of segment.wordTimings) {
+  for (const batch of segment?.wordTimings) {
     // Check if this batch is active (current time is within batch time range)
     const batchHasStarted = segmentTime >= batch.start;
     const batchIsActive = segmentTime <= batch.end;
 
     // Check if all previous batches are completed
-    const batchIndex = segment.wordTimings.indexOf(batch);
-    const allPreviousBatchesCompleted = segment.wordTimings
+    const batchIndex = segment?.wordTimings.indexOf(batch);
+    const allPreviousBatchesCompleted = segment?.wordTimings
       .slice(0, batchIndex)
       .every((prevBatch) => segmentTime > prevBatch.end);
 
@@ -41,7 +41,7 @@ const getCurrentWordsData = (
 
   // If no current batch, show the last completed batch or first batch as preview
   if (!currentBatch) {
-    const completedBatches = segment.wordTimings.filter(
+    const completedBatches = segment?.wordTimings.filter(
       (batch) => segmentTime > batch.end,
     );
     if (completedBatches.length > 0) {

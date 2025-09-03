@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useImageGeneration } from "@/hooks/use-image-generation";
 import { getAudioDuration, estimateAudioDuration } from "@/lib/audio-utils";
 import type { VideoSegment } from "@/types/video";
+import type { SidebarMode } from "../sidebar/video-editor-sidebar";
 
 type EditMode = "image" | "script" | null;
 
@@ -40,6 +41,13 @@ export function useSegmentOperations({
     null,
   );
   const [isRegenerating, setIsRegenerating] = useState<number | null>(null);
+  
+  // Sidebar state management
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(null);
+  const [sidebarSegment, setSidebarSegment] = useState<VideoSegment | null>(null);
+  const [sidebarSegmentIndex, setSidebarSegmentIndex] = useState<number>(-1);
+  const [sidebarInsertAfterIndex, setSidebarInsertAfterIndex] = useState<number>(-1);
+  
   const { generateImage } = useImageGeneration();
 
   // Debug: Track editingState changes
@@ -75,7 +83,33 @@ export function useSegmentOperations({
     setEditingState(newEditingState);
   };
 
-  const handleRegenerateImage = async (
+  // Sidebar handlers
+  const handleEditSegmentSidebar = (index: number, segment: VideoSegment) => {
+    setSidebarMode("edit");
+    setSidebarSegment(segment);
+    setSidebarSegmentIndex(index);
+    // Also update the old editingState for compatibility
+    handleEdit(index, segment);
+  };
+
+  const handleCreateNewFrameSidebar = (insertAfterIndex: number) => {
+    setSidebarMode("new");
+    setSidebarInsertAfterIndex(insertAfterIndex);
+    // Also update the old newFrameState for compatibility
+    handleCreateNewFrame(insertAfterIndex);
+  };
+
+  const closeSidebar = useCallback(() => {
+    setSidebarMode(null);
+    setSidebarSegment(null);
+    setSidebarSegmentIndex(-1);
+    setSidebarInsertAfterIndex(-1);
+    // Also clear old states for compatibility
+    setEditingState(null);
+    setNewFrameState(null);
+  }, []);
+
+  const handleRegenerateImage = useCallback(async (
     index: number,
     newPrompt: string,
     model: string,
@@ -155,9 +189,9 @@ export function useSegmentOperations({
       setIsRegenerating(null);
       // setEditingState(null);
     }
-  };
+  }, [segments, projectId, onSegmentUpdate, generateImage]);
 
-  const handleRegenerateAudio = async (
+  const handleRegenerateAudio = useCallback(async (
     index: number,
     newScript: string,
     voice: string,
@@ -258,7 +292,7 @@ export function useSegmentOperations({
       setIsRegenerating(null);
       // setEditingState(null);
     }
-  };
+  }, [segments, projectId, onSegmentUpdate]);
 
   // Generate image prompt from script
   const generateImagePrompt = async (script: string): Promise<string> => {
@@ -304,7 +338,7 @@ export function useSegmentOperations({
   };
 
   // Generate new frame with all assets
-  const handleGenerateNewFrame = async (
+  const handleGenerateNewFrame = useCallback(async (
     script: string,
     voice: string,
     imageModel: string,
@@ -399,7 +433,7 @@ export function useSegmentOperations({
         prev ? { ...prev, isGenerating: false } : null,
       );
     }
-  };
+  }, [newFrameState, onSegmentInsert, generateImage]);
 
   const closeEditDialog = () => {
     console.log(
@@ -413,6 +447,7 @@ export function useSegmentOperations({
   };
 
   return {
+    // Legacy dialog state (for backward compatibility)
     editingState,
     newFrameState,
     isRegenerating,
@@ -423,5 +458,14 @@ export function useSegmentOperations({
     handleGenerateNewFrame,
     closeEditDialog,
     closeNewFrameDialog,
+    
+    // Sidebar state and handlers
+    sidebarMode,
+    sidebarSegment,
+    sidebarSegmentIndex,
+    sidebarInsertAfterIndex,
+    handleEditSegmentSidebar,
+    handleCreateNewFrameSidebar,
+    closeSidebar,
   };
 }

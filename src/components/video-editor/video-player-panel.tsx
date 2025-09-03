@@ -33,11 +33,25 @@ interface VideoPlayerPanelProps {
     insertAfterIndex: number,
     newSegment: VideoSegment,
   ) => void;
+  // Callback to notify parent about sidebar state
+  onSidebarStateChange?: (state: {
+    mode: any;
+    segment: VideoSegment | null;
+    segmentIndex: number;
+    insertAfterIndex: number;
+    isRegenerating: boolean;
+    isGenerating: boolean;
+    onRegenerateImage: (index: number, prompt: string, model: string) => Promise<void>;
+    onRegenerateAudio: (index: number, script: string, voice: string) => Promise<void>;
+    onGenerate: (script: string, voice: string, imageModel: string) => Promise<void>;
+    onClose: () => void;
+  }) => void;
 }
 
 export function VideoPlayerPanel({
   projectId,
   onSegmentInsert,
+  onSidebarStateChange,
 }: VideoPlayerPanelProps) {
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -73,6 +87,7 @@ export function VideoPlayerPanel({
     uploadBase64File,
     refreshVideo,
   } = useVideoEditor({ projectId });
+  
 
   const {
     isPlaying,
@@ -187,76 +202,77 @@ export function VideoPlayerPanel({
             ref={containerRef}
             className="relative aspect-[9/16] h-full overflow-hidden rounded-2xl bg-black shadow-2xl"
           >
-            {/* Remotion Player */}
-            <Player
-              className="h-80 w-full"
-              ref={playerRef}
-              component={VideoComposition}
-              durationInFrames={totalFrames}
-              compositionWidth={video.format.width}
-              compositionHeight={video.format.height}
-              fps={fps}
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
-              inputProps={{
-                video: video,
-              }}
-              autoPlay={false}
-              controls={true}
-              loop={false}
-              allowFullscreen
-              doubleClickToFullscreen
-              showVolumeControls={true}
-              spaceKeyToPlayOrPause={false}
+              {/* Remotion Player */}
+              <Player
+                className="h-80 w-full"
+                ref={playerRef}
+                component={VideoComposition}
+                durationInFrames={totalFrames}
+                compositionWidth={video.format.width}
+                compositionHeight={video.format.height}
+                fps={fps}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                inputProps={{
+                  video: video,
+                }}
+                autoPlay={false}
+                controls={true}
+                loop={false}
+                allowFullscreen
+                doubleClickToFullscreen
+                showVolumeControls={true}
+                spaceKeyToPlayOrPause={false}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Controls and Segment Timeline */}
+        <div className="mx-auto w-full p-4">
+          <div className="mx-auto max-w-4xl space-y-4">
+            {/* Horizontal Segment Panel */}
+            <VideoFramesPanel
+              segments={video.segments}
+              selectedFrameIndex={selectedFrameIndex}
+              onFrameSelect={selectFrame}
+              currentTime={currentTime}
+              totalDuration={totalDuration}
+              projectId={projectId}
+              onSegmentUpdate={handleSegmentUpdate}
+              onSegmentInsert={onSegmentInsert}
+              orientation="horizontal"
+              showHeader={false}
+              onSidebarStateChange={onSidebarStateChange}
             />
           </div>
         </div>
-      </div>
 
-      {/* Bottom Controls and Segment Timeline */}
-      <div className="mx-auto w-full p-4">
-        <div className="mx-auto max-w-4xl space-y-4">
-          {/* Horizontal Segment Panel */}
-          <VideoFramesPanel
-            segments={video.segments}
-            selectedFrameIndex={selectedFrameIndex}
-            onFrameSelect={selectFrame}
-            currentTime={currentTime}
-            totalDuration={totalDuration}
-            projectId={projectId}
-            onSegmentUpdate={handleSegmentUpdate}
-            onSegmentInsert={onSegmentInsert}
-            orientation="horizontal"
-            showHeader={false}
-          />
-        </div>
+        {/* File Upload Dialog */}
+        <Dialog open={showFileUpload} onOpenChange={setShowFileUpload}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Upload Files</DialogTitle>
+            </DialogHeader>
+            {uploadSegmentId && (
+              <FileUpload
+                projectId={projectId}
+                segmentId={uploadSegmentId}
+                onUploadComplete={(file) => {
+                  toast.success(`${file.originalName} uploaded successfully`);
+                  setShowFileUpload(false);
+                  setUploadSegmentId(null);
+                }}
+                onUploadError={(error) => {
+                  toast.error(`Upload failed: ${error}`);
+                }}
+                multiple={true}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* File Upload Dialog */}
-      <Dialog open={showFileUpload} onOpenChange={setShowFileUpload}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Upload Files</DialogTitle>
-          </DialogHeader>
-          {uploadSegmentId && (
-            <FileUpload
-              projectId={projectId}
-              segmentId={uploadSegmentId}
-              onUploadComplete={(file) => {
-                toast.success(`${file.originalName} uploaded successfully`);
-                setShowFileUpload(false);
-                setUploadSegmentId(null);
-              }}
-              onUploadError={(error) => {
-                toast.error(`Upload failed: ${error}`);
-              }}
-              multiple={true}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+    );
 }
