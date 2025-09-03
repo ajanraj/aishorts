@@ -128,7 +128,7 @@ export function useVideoEditor({
 
         // Handle word timings conversion
         if (updates.wordTimings && updates.wordTimings.length > 0) {
-          segmentUpdates.wordTimings = updates.wordTimings[0];
+          segmentUpdates.wordTimings = updates.wordTimings;
         }
 
         await updateSegmentMutation.mutateAsync({
