@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { VideoGenerationService } from "@/lib/video-generation-service";
+import { SpeechService } from "@/lib/speech-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await VideoGenerationService.generateSingleAudio(
+    const result = await SpeechService.generateSpeech(
       text,
       voice,
       session.user.id!,

@@ -65,7 +65,7 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
 
   const handleWatermarkToggle = async () => {
     if (!video) return;
-    
+
     try {
       await updateVideo({ watermark: !video.watermark });
     } catch (error) {
@@ -122,14 +122,6 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
             <Copy className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm">
-            <Edit3 className="h-4 w-4" />
-          </Button>
-
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-
           {/* Watermark toggle */}
           <Badge
             variant="secondary"
@@ -165,16 +157,18 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-">
               <DropdownMenuItem
                 onClick={() => handleExport("low")}
                 disabled={isExporting || !video}
               >
                 <Download className="mr-2 h-4 w-4" />
                 Export Low Quality
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  Fast
-                </Badge>
+                <span>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Fast
+                  </Badge>
+                </span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleExport("medium")}

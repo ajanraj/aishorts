@@ -6,6 +6,7 @@ import { OpenAIService } from "@/lib/openai-service";
 import { R2Storage } from "@/lib/r2-storage";
 import { parseStructuredOutput } from "@/lib/api-utils";
 import { TranscriptionService } from "@/lib/transcription-service";
+import { SpeechService } from "@/lib/speech-service";
 
 // MP3 frame header parsing utilities
 function getMP3Duration(buffer: Buffer): number | null {
@@ -322,76 +323,22 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     duration: number;
     wordTimings?: any[];
   }> {
-    // Generate speech using OpenAI TTS
-    const mp3 = await openai.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: voice as "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer",
-      input: text,
-    });
-
-    // Convert response to buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-
-    // Get duration from buffer
-    let duration = 0;
-
-    // Generate word-level timestamps using transcription service and convert to batches
-    let wordTimings: any[] | undefined;
-    try {
-      console.log(`Generating word timestamps for segment ${index}...`);
-      const transcriptionResult =
-        await TranscriptionService.transcribeAudio(buffer);
-
-      // Convert flat word timings to batched structure (default 3 words per batch)
-      const batchedTimings = TranscriptionService.convertToWordBatches(
-        transcriptionResult.words,
-        3,
-      );
-
-      wordTimings = batchedTimings;
-      duration = transcriptionResult.duration;
-      console.log(
-        `Generated ${batchedTimings.length} batched word groups for segment ${index}`,
-      );
-    } catch (error) {
-      console.warn(
-        `Failed to generate word timestamps for segment ${index}:`,
-        error,
-      );
-      // Continue without word timings rather than failing the entire process
-    }
-
-    // Upload to R2 storage
-    const { key, url } = await R2Storage.uploadAudio(
-      buffer,
+    // Use the unified SpeechService to generate speech
+    const result = await SpeechService.generateSpeech(
+      text,
+      voice,
       userId,
       projectId,
-      index,
       segmentId,
+      index
     );
 
-    // Create file record in database
-    await ProjectService.createFile({
-      projectId: projectId,
-      segmentId: segmentId,
-      fileType: "audio",
-      fileName: `audio_${segmentId}_${Date.now()}.mp3`,
-      originalName: `segment_${index}_audio.mp3`,
-      mimeType: "audio/mpeg",
-      fileSize: buffer.length,
-      r2Key: key,
-      r2Url: url,
-      uploadStatus: "completed",
-      metadata: {
-        text: text,
-        voice: voice,
-        duration: duration,
-        generatedAt: new Date().toISOString(),
-        wordTimings: wordTimings || null,
-      },
-    });
-
-    return { audioUrl: url, key, duration, wordTimings };
+    return {
+      audioUrl: result.audioUrl,
+      key: result.key,
+      duration: result.duration,
+      wordTimings: result.wordTimings,
+    };
   }
 
   /**
@@ -886,90 +833,22 @@ Return a JSON object with "prompts" array containing one detailed prompt for eac
     duration: number;
     wordTimings?: any[];
   }> {
-    // Generate speech using OpenAI TTS
-    const mp3 = await openai.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: voice as "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer",
-      input: text,
-    });
-
-    // Convert response to buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-
-    // Generate project ID if not provided
-    const finalProjectId =
-      projectId ||
-      `project_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-
-    // Get duration from buffer
-    let duration = 0;
-
-    // Generate word-level timestamps using transcription service and convert to batches
-    let wordTimings: any[] | undefined;
-    try {
-      console.log(
-        `Generating word timestamps for single audio segment ${index}...`,
-      );
-      const transcriptionResult =
-        await TranscriptionService.transcribeAudio(buffer);
-
-      // Convert flat word timings to batched structure (default 3 words per batch)
-      const batchedTimings = TranscriptionService.convertToWordBatches(
-        transcriptionResult.words,
-        3,
-      );
-
-      duration = transcriptionResult.duration;
-      wordTimings = batchedTimings;
-      console.log(
-        `Generated ${batchedTimings.length} batched word groups for single audio segment ${index}`,
-      );
-    } catch (error) {
-      console.warn(
-        `Failed to generate word timestamps for single audio segment ${index}:`,
-        error,
-      );
-      // Continue without word timings rather than failing the entire process
-    }
-
-    // Upload to R2 storage
-    const { key, url } = await R2Storage.uploadAudio(
-      buffer,
+    // Use the unified SpeechService to generate speech
+    const result = await SpeechService.generateSpeech(
+      text,
+      voice,
       userId,
-      finalProjectId,
-      index,
+      projectId,
       segmentId,
+      index
     );
 
-    // Create file record in database if we have a project and segment
-    if (segmentId) {
-      await ProjectService.createFile({
-        projectId: finalProjectId,
-        segmentId: segmentId,
-        fileType: "audio",
-        fileName: `audio_${segmentId}_${Date.now()}.mp3`,
-        originalName: `segment_${index}_audio.mp3`,
-        mimeType: "audio/mpeg",
-        fileSize: buffer.length,
-        r2Key: key,
-        r2Url: url,
-        uploadStatus: "completed",
-        metadata: {
-          text: text,
-          voice: voice,
-          duration: duration,
-          generatedAt: new Date().toISOString(),
-          wordTimings: wordTimings || null,
-        },
-      });
-    }
-
     return {
-      audioUrl: url,
-      key,
-      projectId: finalProjectId,
-      duration,
-      wordTimings,
+      audioUrl: result.audioUrl,
+      key: result.key,
+      projectId: result.projectId,
+      duration: result.duration,
+      wordTimings: result.wordTimings,
     };
   }
 

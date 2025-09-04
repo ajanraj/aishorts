@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/elevenlabs": "^1.0.8",
     "@ai-sdk/openai": "^2.0.23",
     "@auth/drizzle-adapter": "^1.4.2",
     "@aws-sdk/client-s3": "^3.873.0",

@@ -1,22 +1,44 @@
+import { VoiceConfigManager } from "@/lib/voice-config";
+
 export interface VoiceOption {
   id: string;
   name: string;
   description: string;
+  provider: string;
+  type: string;
 }
 
-export const voiceOptions: VoiceOption[] = [
-  { id: "alloy", name: "Alloy", description: "Neutral and balanced" },
-  { id: "echo", name: "Echo", description: "Clear and articulate" },
-  { id: "fable", name: "Fable", description: "Warm and expressive" },
-  { id: "onyx", name: "Onyx", description: "Deep and authoritative" },
-  { id: "nova", name: "Nova", description: "Bright and energetic" },
-  { id: "shimmer", name: "Shimmer", description: "Soft and gentle" },
-];
+// Get all voices from the centralized VoiceConfigManager
+const getAllVoices = () => {
+  const voices = VoiceConfigManager.getAllVoices();
+  return voices.map(voice => ({
+    id: voice.id,
+    name: voice.name,
+    description: voice.description,
+    provider: voice.provider,
+    type: voice.type
+  }));
+};
+
+export const voiceOptions: VoiceOption[] = getAllVoices();
+
+// Grouped by provider for organized display
+export const voiceOptionsByProvider = {
+  openai: voiceOptions.filter(voice => voice.provider === "openai"),
+  elevenlabs: voiceOptions.filter(voice => voice.provider === "elevenlabs"),
+};
 
 export const getVoiceOption = (id: string): VoiceOption | undefined => {
   return voiceOptions.find((voice) => voice.id === id);
 };
 
 export const getDefaultVoiceOption = (): VoiceOption => {
-  return voiceOptions[1]; // Default to echo
+  const defaultVoice = VoiceConfigManager.getDefaultVoice();
+  return {
+    id: defaultVoice.id,
+    name: defaultVoice.name,
+    description: defaultVoice.description,
+    provider: defaultVoice.provider,
+    type: defaultVoice.type
+  };
 };
