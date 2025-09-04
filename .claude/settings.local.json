@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.fal.ai)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
