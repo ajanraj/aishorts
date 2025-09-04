@@ -10,7 +10,7 @@ export interface Project {
   script?: string;
   scriptStyleId?: string;
   duration?: number; // in seconds
-  status: 'draft' | 'script-ready' | 'generating' | 'completed' | 'failed';
+  status: "draft" | "script-ready" | "generating" | "completed" | "failed";
   format?: { width: number; height: number };
   settings?: any;
   // Video generation specific fields
@@ -30,6 +30,8 @@ export interface Project {
   updatedAt: string;
   segments?: ProjectSegment[];
   files?: ProjectFile[];
+  layers?: ProjectLayer[];
+  tracks?: ProjectTrack[];
 }
 
 // Project Segment interface matching database schema
@@ -63,7 +65,7 @@ export interface ProjectFile {
   id: string;
   projectId: string;
   segmentId?: string;
-  fileType: 'image' | 'video' | 'audio' | 'overlay';
+  fileType: "image" | "video" | "audio" | "overlay";
   fileName: string;
   originalName: string;
   mimeType: string;
@@ -71,7 +73,7 @@ export interface ProjectFile {
   r2Key: string;
   r2Url: string;
   tempUrl?: string;
-  uploadStatus: 'uploading' | 'completed' | 'failed';
+  uploadStatus: "uploading" | "completed" | "failed";
   metadata?: any;
   createdAt: string;
   expiresAt?: string;
@@ -135,7 +137,8 @@ export interface ProjectSegmentWithFiles extends ProjectSegment {
   files: ProjectFile[];
 }
 
-export interface ProjectWithDetails extends Omit<Project, 'segments' | 'files'> {
+export interface ProjectWithDetails
+  extends Omit<Project, "segments" | "files"> {
   segments: ProjectSegmentWithFiles[];
   files: ProjectFile[];
   layers: ProjectLayer[];
@@ -158,7 +161,7 @@ export interface UpdateProjectData {
   script?: string;
   scriptStyleId?: string;
   duration?: number;
-  status?: Project['status'];
+  status?: Project["status"];
   format?: { width: number; height: number };
   settings?: any;
 }
@@ -190,7 +193,7 @@ export interface UpdateSegmentData {
 export interface CreateFileData {
   projectId: string;
   segmentId?: string;
-  fileType: ProjectFile['fileType'];
+  fileType: ProjectFile["fileType"];
   fileName: string;
   originalName: string;
   mimeType: string;
@@ -223,31 +226,31 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode: number = 500,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
 export class ValidationError extends ApiError {
   constructor(message: string) {
-    super(message, 400, 'VALIDATION_ERROR');
-    this.name = 'ValidationError';
+    super(message, 400, "VALIDATION_ERROR");
+    this.name = "ValidationError";
   }
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message: string = 'Unauthorized') {
-    super(message, 401, 'UNAUTHORIZED');
-    this.name = 'UnauthorizedError';
+  constructor(message: string = "Unauthorized") {
+    super(message, 401, "UNAUTHORIZED");
+    this.name = "UnauthorizedError";
   }
 }
 
 export class NotFoundError extends ApiError {
-  constructor(message: string = 'Resource not found') {
-    super(message, 404, 'NOT_FOUND');
-    this.name = 'NotFoundError';
+  constructor(message: string = "Resource not found") {
+    super(message, 404, "NOT_FOUND");
+    this.name = "NotFoundError";
   }
 }
 
@@ -287,7 +290,9 @@ export interface LegacyProjectData {
 }
 
 // Helper function to migrate legacy project data
-export function migrateLegacyProject(legacy: LegacyProjectData): Partial<Project> {
+export function migrateLegacyProject(
+  legacy: LegacyProjectData,
+): Partial<Project> {
   return {
     id: legacy.id,
     title: legacy.title,
@@ -296,44 +301,48 @@ export function migrateLegacyProject(legacy: LegacyProjectData): Partial<Project
     status: determineProjectStatus(legacy),
     createdAt: new Date(legacy.createdAt).toISOString(),
     updatedAt: new Date(legacy.updatedAt).toISOString(),
-    segments: legacy.segments?.map((seg, index) => ({
-      id: `legacy_${legacy.id}_${index}`,
-      projectId: legacy.id,
-      order: seg.order || index,
-      text: seg.text,
-      imagePrompt: seg.imagePrompt,
-      duration: seg.duration,
-      audioVolume: 1.0,
-      playBackRate: 1.0,
-      withBlur: false,
-      backgroundMinimized: false,
-      createdAt: new Date(legacy.createdAt).toISOString(),
-      updatedAt: new Date(legacy.updatedAt).toISOString(),
-    })) || [],
+    segments:
+      legacy.segments?.map((seg, index) => ({
+        id: `legacy_${legacy.id}_${index}`,
+        projectId: legacy.id,
+        order: seg.order || index,
+        text: seg.text,
+        imagePrompt: seg.imagePrompt,
+        duration: seg.duration,
+        audioVolume: 1.0,
+        playBackRate: 1.0,
+        withBlur: false,
+        backgroundMinimized: false,
+        createdAt: new Date(legacy.createdAt).toISOString(),
+        updatedAt: new Date(legacy.updatedAt).toISOString(),
+      })) || [],
   };
 }
 
-function determineProjectStatus(legacy: LegacyProjectData): Project['status'] {
+function determineProjectStatus(legacy: LegacyProjectData): Project["status"] {
   if (legacy.segments && legacy.segments.length > 0) {
-    const segmentsWithImages = legacy.segments.filter(s => s.imageUrl).length;
-    const segmentsWithAudio = legacy.segments.filter(s => s.audioUrl).length;
-    
-    if (segmentsWithImages === legacy.segments.length && segmentsWithAudio === legacy.segments.length) {
-      return 'completed';
+    const segmentsWithImages = legacy.segments.filter((s) => s.imageUrl).length;
+    const segmentsWithAudio = legacy.segments.filter((s) => s.audioUrl).length;
+
+    if (
+      segmentsWithImages === legacy.segments.length &&
+      segmentsWithAudio === legacy.segments.length
+    ) {
+      return "completed";
     } else if (segmentsWithImages > 0 || segmentsWithAudio > 0) {
-      return 'generating';
+      return "generating";
     } else {
-      return 'script-ready';
+      return "script-ready";
     }
   }
-  
+
   if (Object.keys(legacy.generatedVideos || {}).length > 0) {
-    return 'completed';
+    return "completed";
   } else if (Object.keys(legacy.generatedImages || {}).length > 0) {
-    return 'generating';
+    return "generating";
   } else if (legacy.script) {
-    return 'script-ready';
+    return "script-ready";
   }
-  
-  return 'draft';
+
+  return "draft";
 }

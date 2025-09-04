@@ -189,7 +189,7 @@ The response will be structured as a JSON object with a "chunks" array containin
   }
 
   /**
-   * Generate image prompts for video segments
+   * Generate image prompts for video segments with visual consistency
    */
   static async generateImagePrompts(
     chunks: string[],
@@ -222,13 +222,16 @@ The response will be structured as a JSON object with a "chunks" array containin
         messages: [
           {
             role: "system",
-            content: `You are an expert at creating detailed image prompts for AI image generation. For each script chunk provided, create a compelling visual prompt that:
+            content: `You are an expert at creating detailed image prompts for AI image generation that maintain visual consistency across a video sequence. For each script chunk provided, create a compelling visual prompt that:
 
 1. Captures the essence and mood of the text
 2. Is optimized for the ${styleName} visual style
 3. Includes cinematic composition details
 4. Specifies lighting, atmosphere, and visual effects
 5. Is detailed enough to generate high-quality, engaging images
+6. MAINTAINS VISUAL CONSISTENCY: Each image should feel like a natural progression from the previous frame
+7. CREATES SMOOTH TRANSITIONS: Include consistent elements like camera angle, lighting setup, color palette, and environmental details
+8. PRESERVES CONTINUITY: Keep consistent character positioning, environmental context, and visual style throughout the sequence
 
 Base image style: ${imageStyle.systemPrompt}
 
@@ -238,11 +241,19 @@ Style guidelines for "${styleName}":
 - Cinematic composition with depth
 - Detailed textures and atmospheric effects
 
-Return a JSON object with "prompts" array containing one detailed prompt for each chunk.`,
+CRITICAL CONSISTENCY REQUIREMENTS:
+- Maintain the same camera perspective/angle throughout the sequence
+- Keep consistent lighting conditions (time of day, light sources, shadows)
+- Preserve environmental elements (location, weather, atmosphere)
+- Use consistent color palette and mood
+- Ensure smooth visual flow from one frame to the next
+- Each prompt should reference visual elements that connect to the previous scene
+
+Return a JSON object with "prompts" array containing one detailed prompt for each chunk, ensuring each builds upon the previous visual context.`,
           },
           {
             role: "user",
-            content: `Create image prompts for these script chunks: ${JSON.stringify(chunks)}`,
+            content: `Create visually consistent image prompts for these script chunks that will form a cohesive video sequence: ${JSON.stringify(chunks)}`,
           },
         ],
         temperature: 0.8,

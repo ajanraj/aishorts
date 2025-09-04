@@ -28,6 +28,7 @@ import {
   useVideoEditorPlayer,
   useVideoEditorExport,
   useVideoEditorModals,
+  useVideoEditorOperations,
 } from "./providers/video-editor-provider";
 
 interface VideoEditorHeaderProps {
@@ -43,6 +44,7 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
   const { isExporting, exportProgress, exportVideo } = useVideoEditorExport();
   const { showVideoPreview, exportedVideo, hideVideoPreviewModal } =
     useVideoEditorModals();
+  const { updateVideo } = useVideoEditorOperations();
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -57,6 +59,19 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
       console.error("Export failed:", error);
       alert(
         `Export failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  };
+
+  const handleWatermarkToggle = async () => {
+    if (!video) return;
+    
+    try {
+      await updateVideo({ watermark: !video.watermark });
+    } catch (error) {
+      console.error("Failed to toggle watermark:", error);
+      alert(
+        `Failed to update watermark: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   };
@@ -118,9 +133,14 @@ export function VideoEditorHeader({ className }: VideoEditorHeaderProps = {}) {
           {/* Watermark toggle */}
           <Badge
             variant="secondary"
-            className="bg-green-100 text-green-800 hover:bg-green-200"
+            className={`cursor-pointer transition-colors ${
+              video?.watermark
+                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+            onClick={handleWatermarkToggle}
           >
-            Watermark
+            {video?.watermark ? "Watermark ON" : "Watermark OFF"}
           </Badge>
 
           {/* Export/Share buttons */}

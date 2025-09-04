@@ -40,6 +40,7 @@ export class VideoProjectAdapter {
     project: Project,
     projectFiles: ProjectFile[] = [],
   ): Video {
+    console.log("projectToVideo", project);
     // Use nested files from segments if available, otherwise fall back to separate projectFiles array
     const segments =
       project.segments?.length && project.segments[0].files
@@ -56,16 +57,16 @@ export class VideoProjectAdapter {
       segments,
       // Default values for video editor
       selectedMedia: { images: [], videos: [] },
-      voice: "default",
-      type: "short",
+      voice: project.voice || "default",
+      type: project.type || "faceless_video",
       mediaType: "image",
       isRemotion: true,
       selectedModel: "default",
       audioType: "tts",
       audioPrompt: "",
-      watermark: false,
+      watermark: project.watermark || false,
       isFeatured: false,
-      layers: [],
+      layers: project.layers || [],
       tracks: [],
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
