@@ -41,7 +41,7 @@ export function VideoEditorSidebar({
   if (!isOpen) return null;
 
   return (
-    <div className="h-full w-full border-l border-gray-200 bg-white shadow-lg">
+    <div className="h-full w-80 overflow-y-auto border-l border-gray-200 bg-white shadow-lg">
       {/* Sidebar Header */}
       <div className="flex items-center justify-between border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold">

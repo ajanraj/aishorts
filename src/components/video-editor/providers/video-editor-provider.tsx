@@ -8,8 +8,10 @@ import React, {
   useEffect,
 } from "react";
 import { useVideoEditor, useVideoPlayer } from "@/hooks/use-video-editor";
+import { useUpdateProject } from "@/hooks/use-projects";
 import { useSegmentOperations } from "../hooks/use-segment-operations";
 import type { Video, VideoSegment } from "@/types/video";
+import type { Project } from "@/types/project";
 import type { SidebarMode } from "../sidebar/video-editor-sidebar";
 
 // ============================================================================
@@ -77,6 +79,7 @@ interface VideoEditorActions {
     index: number,
     updates: Partial<VideoSegment>,
   ) => Promise<void>;
+  updateVideo: (updates: Partial<Video>) => Promise<void>;
   uploadSegmentFile: (
     segmentId: string,
     file: File,
@@ -161,6 +164,9 @@ export function VideoEditorProvider({
 
   // Use existing video editor hook
   const videoEditor = useVideoEditor({ projectId });
+  
+  // Use project update mutation
+  const updateProjectMutation = useUpdateProject();
 
   // Use existing video player hook
   const videoPlayer = useVideoPlayer(videoEditor.video);
@@ -179,6 +185,24 @@ export function VideoEditorProvider({
       // on project?.updatedAt in useVideoEditor
     },
     [videoEditor.updateSegment],
+  );
+
+  // Update video-level properties
+  const updateVideo = useCallback(
+    async (updates: Partial<Video>) => {
+      // Map video properties to project properties
+      const projectUpdates: Partial<Project> = {};
+      
+      if (updates.watermark !== undefined) {
+        projectUpdates.watermark = updates.watermark;
+      }
+      
+      await updateProjectMutation.mutateAsync({
+        projectId,
+        data: projectUpdates,
+      });
+    },
+    [projectId, updateProjectMutation],
   );
 
   // Use existing segment operations hook
@@ -442,6 +466,7 @@ export function VideoEditorProvider({
 
       // Video Operations
       updateSegment,
+      updateVideo,
       uploadSegmentFile: videoEditor.uploadSegmentFile,
       uploadBase64File: videoEditor.uploadBase64File,
       refreshVideo: videoEditor.refreshVideo,
@@ -533,6 +558,7 @@ export function useVideoEditorOperations() {
   return {
     ...operations,
     updateSegment: actions.updateSegment,
+    updateVideo: actions.updateVideo,
     insertSegment: actions.insertSegment,
     regenerateImage: actions.regenerateImage,
     regenerateAudio: actions.regenerateAudio,
